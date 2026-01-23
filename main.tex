@@ -1,4 +1,4 @@
-\documentclass[acmsmall,screen,review,anonymous]{acmart}
+\documentclass[acmsmall,screen,review,anonymous,natbib=false]{acmart}
 \usepackage[utf8]{inputenc} % Required for inputting international characters
 \usepackage[T1]{fontenc} % Output font encoding for international characters
 
@@ -14,6 +14,7 @@
 % \usepackage[hidelinks]{hyperref}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage{amsmath}
+\let\Bbbk\relax  % Prevent conflict with newtx fonts
 \usepackage{amssymb}
 \usepackage{balance}
 \usepackage{booktabs}
