@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+    node distance=0.7cm and 1cm,
+    box/.style={rectangle, draw, rounded corners, minimum width=1.6cm, minimum height=0.6cm, align=center, fill=white, font=\scriptsize},
+    inputbox/.style={box, fill=blue!10},
+    processbox/.style={box, fill=orange!15},
+    outputbox/.style={box, fill=green!10},
+    specbox/.style={box, fill=purple!10},
+    arrow/.style={->, >=stealth, semithick},
+    label/.style={font=\tiny\itshape, text=gray}
+]
+
+% Inputs (top row)
+\node[inputbox] (initseq) {Init Seq};
+\node[specbox, right=of initseq] (goal) {Goal};
+\node[specbox, right=of goal] (role) {Role};
+
+% Processing
+\node[processbox, below=0.8cm of goal] (setup) {Deploy +\\Init};
+\node[processbox, below=of setup] (snapshot) {Snapshot};
+\node[processbox, right=1.2cm of snapshot] (queue) {Function\\Queue};
+\node[processbox, right=of queue] (cartesian) {Cartesian};
+\node[processbox, below=of cartesian] (exec) {Execute};
+\node[processbox, left=of exec] (eval) {Evaluate};
+
+% Output
+\node[outputbox, below=of eval] (output) {Violations};
+
+% Main flow
+\draw[arrow] (initseq) -- (setup);
+\draw[arrow] (goal) -- (setup);
+\draw[arrow] (role) -- (setup);
+\draw[arrow] (setup) -- (snapshot);
+\draw[arrow] (snapshot) -- (queue);
+\draw[arrow] (queue) -- (cartesian);
+\draw[arrow] (cartesian) -- (exec);
+\draw[arrow] (exec) -- (eval);
+\draw[arrow] (eval) -- node[label, left] {violated} (output);
+
+% Revert
+\draw[arrow, dashed, gray] (eval.west) -- ++(-0.3,0) |- node[label, pos=0.3, left] {revert} (snapshot.west);
+
+% Expand
+\draw[arrow, dashed, gray] (exec.north) -- ++(0,0.25) -| (queue.north);
+
+\end{tikzpicture}

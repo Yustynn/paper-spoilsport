@@ -1,0 +1,132 @@
+\section{Evaluation Setup}
+\label{ss:sec:evaluation_setup}
+
+\smallskip
+\noindent
+\textbf{Research Questions:} We answer the following research questions:
+
+\smallskip
+\textbf{RQ1 (State Initialization)}
+How well does \spoilsport find meaningful starting states on rug pull smart contracts?
+
+\smallskip
+\textbf{RQ2 (Correlation with Known Rug Pull Types:)}
+In searching for goal violations, does \spoilsport also uncover the root causes of rug pulls?
+
+\smallskip
+\textbf{RQ3 (New Information of Rug Pull Mechanisms:)}
+Do the found goal violations effectively disclose new information about rug pull mechanisms in their contracts?
+
+\smallskip
+\textbf{RQ4 (Comparison to \approach{})}
+How quickly and comprehensively does \spoilsport perform at discovering goal violations relative to \approach{}?
+
+\smallskip
+\textbf{RQ1} investigates the efficacy of finding sequences of transactions to transform the smart contract states into ones which resemble characteristics of expected usage.
+\textbf{RQ2} and \textbf{RQ3} inspect the relationship between found goal violations and trap doors in rug pulls.
+Our evaluation does not aim to detect rug pulls in the wild, but rather enrich the ground truth of contracts which are known to be malicious.
+In \textbf{RQ2}, we present goal violation results and investigate whether these violations correspond to the dataset's labelled rug pull types.
+In \textbf{RQ3}, we investigate the goal violations in more detail.
+While our dataset gives us a high-level classification of the rug pull trap door, we wish to understand whether there is useful additional detail about rug pull mechanics which we may retrieve from goal violations.
+Finally, \textbf{RQ4} provides a direct comparison with the prior \approach{} symbolic execution-based solver.
+
+
+\smallskip
+\noindent 
+\noindent \textbf{Heuristic-based detection of key variables:}
+    We implement a refinement on the heuristic-driven detection methodology for the key variables of the \texttt{balances} mapping variable (user token holdings) and \texttt{totalSupply} variable (the sum of all issued tokens), which may take arbitrary names.
+    This is adapted from heuristics used in \approach{} and other work~\cite{fairchecker}.
+    We make use of functions mandated by the ERC-20 specification~\cite{ERC20Spec}.
+    For \texttt{balances}, we retrieve the type-matched variable which is read by \texttt{balanceOf()} and written by \texttt{transfer()}.
+    If no candidate exists, we additionally check for a variable named \texttt{balanceOf} as that would result in an implicit \texttt{balanceOf} function.
+    For \texttt{totalSupply}, we retrieve the type-matched variable which is read by \texttt{totalSupply()} and written by \texttt{transfer()}.
+    If no candidate exists, we additionally check for a variable named \texttt{totalSupply} as that would result in an implicit \texttt{totalSupply} function.
+
+
+
+\smallskip
+\noindent
+\textbf{Setup for rug pull evaluation (\textbf{RQ1-3}):}
+We use a dataset from prior work on rug pulls~\cite{SoKRugPull2025}, labelling 2,391 known rug pull contracts under their proposed root cause taxonomy.
+\autoref{ss:fig:dataset-filtration} illustrates our process of filtering to the 1,376 (57.5\%) contracts used for our evaluation.
+Of these, 2,279 have Solidity source code available from Etherscan~\cite{etherscan}.
+As we only define roles and goals for ERC-20 smart contracts, we filter these to ERC-20 contracts only (2,002 contracts).
+To generalize our specification of roles/goals across contracts, we use heuristic-based detection of required key variables, leaving us with 1,680 contracts.
+Additionally, our fuzzer does not currently support contracts which perform function calls to external dependencies.
+This leaves us with a final 1,376 contracts for our evaluation.
+We allocate a time budget of 30 seconds per contract.
+
+\input{diagrams/diagram_rp_dataset_filtration.tex}
+
+The dataset labels are high-level, specifying the kind of root cause of the rug pull as well classifying its type.
+This does not allow for reproduction of the exact mechanism of the rug pull (i.e., it does not identify which functions or transactions were used to actuate the fraud).
+As in the full dataset, the trap door labels in this sample are heavily skewed towards \textit{Transaction Limitation} violations (97.7\% of all entries).
+Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged users to transfer their tokens, 3.1\% are due to \textit{Freeze Account} which prevent victim wallet addresses from performing transactions and
+1.4\% are due to \textit{Transfer Block} which globally disables transfers.
+
+\smallskip
+\noindent
+\textbf{Setup for comparison with \approach (\textbf{RQ4}):}
+We use the same set of \numcontracts ERC-20 popular smart contracts which were evaluated in \approach.
+In keeping with \approach{}, we use three users for evaluation and limit to the maximum transaction length found by \approach{}, being two.
+Similarly, we match the \approach{} time budget of 60 seconds per goal for each contract.
+
+We note that comparing the \approach{} approach of symbolic execution to the \spoilsport{} approach of fuzzing requires careful interpretation.
+In general, symbolic execution theoretically guarantees completeness and full path coverage but is limited by path explosion and overapproximations induced by practical optimizations.
+While in theory \approach{}'s general approach may find all sequences of function calls that result in goal violations with no false negatives, in practice it is limited by its time budget and contains false positives induced by optimizations such as bitwidth restriction for large datatypes.
+Fuzzing trades off these completeness guarantees for efficient exploration in many cases.
+As we run with the real bytecode on a full EVM implementation, there are no false positives.
+However fuzzing in general falls victim to other limitations such difficulty generating input that satisfies constraints guarded by magic constants (e.g., a conditional \texttt{if (x = 432498)}, requiring the input $x$ to be exactly $432498$).
+Our comparison is therefore purely on practical utility: given the same role/goal specification and time budget, which of the two solvers finds more goal violations?
+
+
+\smallskip
+\noindent 
+\textbf{Optimizations:} To speed up the construction of transaction sequences, we implement the following optimizations:
+\begin{enumerate}
+    \item \textit{Initial corpuses optimizations:}
+        To prioritize values at sign boundaries, we used initial corpuses of $\{-1, 0, 1\}$ for unsigned integer parameters and $\{0, 1\}$ for signed integer parameters.
+        Once exhausted, random values based on bitwidth are generated.
+        This is to prevent overshooting when conditionals bound input values.
+        We also constrained address parameters to select from the available bounded address space only.
+        Additionally, we retrieve any constant values from goal specification and inject those into the initial corpus.
+    \item \textit{Bounded address space:}
+        Similar to \approach{}, we bound the address space.
+        Where addresses are normally 160-bit values, we constrain them with an adjustable parameter.
+        During our static analysis stage, we retrieve hardcoded addresses from the Solidity source code as these are common in rug-pull contracts (e.g., used to encode privileged addresses).
+    \item \textit{Revm testnet backend:} 
+        We integrated the following EVM implementations as testnet backends for \spoilsport: Ethereum Tester~\cite{ethereum_tester}, Anvil~\cite{anvil} with JSON RPC and Revm~\cite{revm} with rust bindings to python.
+        Of the three, the Revm integration was fastest at 6,962 transactions per second (TPS).
+        Anvil and Ethereum Tester were significantly slower, with 91TPS and 44TPS respectively.
+        We use the Revm integration for experiments as it is two orders of magnitude faster.
+\end{enumerate}
+
+\smallskip
+\noindent
+\textbf{\spoilsport configuration:}
+We dynamically configure the number of users in our bounded address space to $\max{hardcoded_addresses + 2, 3}$.
+This ensures that all hardcoded addresses are available as users while also including non-hardcoded users to represent typical end-users.
+For every function evaluated, we configure the solver to generate test input corresponding to the cartesian product of five values per parameter across all potential users as transactors.
+
+During the \textit{State Initialization} step, we limit the maximum transaction sequence size to 20.
+Additionally, we bias the initial contract deployer user to be a non-hardcoded address to increase realism.
+During the \textit{Goal Violation Search} step, we limit the maximum transaction sequence size to two.
+This is due to the majority of rug pull features identified in literature~\cite{trapdoor,SoKRugPull2025,pied-piper} requiring at most two transactions.
+
+
+\smallskip
+\noindent
+\textbf{Frameworks and Platforms:}
+We retrieve smart contract source code from Etherscan~\cite{EthMarketCap}.
+During our \textit{Static Analysis} stage, we use Slither~\cite{Slither} to construct function summaries which contain data and control flow dependencies.
+We use the Revm \cite{revm} Ethereum Virtual Machine (EVM) implementation as our execution backend.
+The majority of the code is written in Python, with custom Rust bindings for Revm written in PyO3.
+All evaluations were conducted on a 16-inch Macbook Pro (2021 model, M1 Max CPU), the same machine as used in the \approach{} evaluation.
+
+
+% \smallskip
+% \noindent
+% \textbf{Metrics and Measures:}
+% For \textbf{RQ1}, we report the number of contracts for which we could find initial states. Additionally, we report timing statistics to evaluate efficiency.
+% For \textbf{RQ4}, we report the total number of goal violations found by \approach and \spoilsport{}, broken down by goal.
+% We additionally report the total time taken for the solving portion of each goal.

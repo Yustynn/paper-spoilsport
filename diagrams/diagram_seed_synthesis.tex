@@ -1,0 +1,40 @@
+\begin{tikzpicture}[
+    node distance=0.7cm and 1cm,
+    box/.style={rectangle, draw, rounded corners, minimum width=1.6cm, minimum height=0.6cm, align=center, fill=white, font=\scriptsize},
+    inputbox/.style={box, fill=blue!10},
+    processbox/.style={box, fill=orange!15},
+    outputbox/.style={box, fill=green!10},
+    arrow/.style={->, >=stealth, semithick},
+    label/.style={font=\tiny\itshape, text=gray}
+]
+
+% Row 1: Inputs
+\node[inputbox] (conditions) {Conditions};
+\node[inputbox, right=of conditions] (contract) {Contract};
+
+% Row 2: Processing
+\node[processbox, below=0.8cm of conditions, xshift=0.8cm] (queues) {Priority\\Queues};
+\node[processbox, right=of queues] (funsel) {Function\\Select};
+\node[processbox, right=of funsel] (cartesian) {Cartesian\\Enum};
+
+% Row 3: Execution
+\node[processbox, below=0.8cm of cartesian] (exec) {Execute};
+\node[processbox, left=of exec] (eval) {Evaluate};
+\node[outputbox, left=of eval] (output) {Sequence};
+
+% Arrows - main flow
+\draw[arrow] (conditions) -- (queues);
+\draw[arrow] (contract) -- (queues);
+\draw[arrow] (queues) -- (funsel);
+\draw[arrow] (funsel) -- (cartesian);
+\draw[arrow] (cartesian) -- (exec);
+\draw[arrow] (exec) -- (eval);
+\draw[arrow] (eval) -- node[label, above] {done} (output);
+
+% Feedback
+\draw[arrow, dashed, gray] (eval.north) -- ++(0,0.3) -| node[label, pos=0.2, above] {improved} (queues.south);
+
+% Static analysis
+\draw[arrow, gray] (contract.south) |- (funsel.north);
+
+\end{tikzpicture}

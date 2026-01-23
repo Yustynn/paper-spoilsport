@@ -1,0 +1,31 @@
+\section{Threats to Validity}
+\label{ss:sec:threats_to_validity}
+
+\smallskip
+\noindent \textbf{Limitations of the dataset:}
+The original dataset is heavily skewed towards \textit{Transaction Limitation} (87\% of rug pulls)~\cite{SoKRugPull2025}.
+After our filtering pipeline detailed in \autoref{ss:sec:evaluation_setup} and after excluding the 52 contracts which we failed to find initial state for, this skew increases to 98.3\%.
+This limits the generalizability of our results to other rug pull types.
+However, this is partially mitigated by our analysis in \textbf{RQ4}, which finds 964 non-\textit{Transaction Limitation} rug pull mechanics.
+Additionally, this dataset was created from three composite datasets of other works~\cite{pied-piper,honeypot_usenix19,trapdoor}, implying that this may be representative of rug pull contracts.
+
+\smallskip
+\noindent
+\textbf{Limitations of the goal violation discovery task:} 
+    While this work demonstrates overlap, goal violations and rug pull mechanisms are not equivalent.
+    As addressed in \autoref{ch:goalseeker}, there are legitimate purposes for goal violations which are not fraudulent.
+    Further, end-users have subjective goals.
+    While the specification is meant to be a reasonable stand in for this subjectivity, real-world end-user goals may differ from the specification.
+    Additionally, ERC-20 contracts may have a wider diversity of roles.
+    For instance, rug pull contracts often have rely on a router smart contract for integration with decentralized exchanges, which motivates a router role.
+    Therefore the specification may be incomplete with respect to particular contracts.
+
+\smallskip
+\noindent
+\textbf{Limitations of the \spoilsport solver:} 
+We are primarily limited by our time budget and configuration of five candidates for each function parameter.
+Additionally, we inherit the limitations of fuzzers in general, such as difficulty in finding test inputs which meet tightly-bounded conditions.
+Specific to Ethereum, our fuzzer does not currently attempt different block timestamps for transactions.
+This renders it difficult to find violations which are dependent on block timestamps.
+Additionally, our solver does not support multi-contract analysis.
+We therefore had to exclude 304 (12.7\% of) contracts which called external dependencies, introducing selection bias into our analysis.

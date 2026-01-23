@@ -1,0 +1,87 @@
+\section{Background}
+\label{ss:sec:background}
+
+\subsection{Ethereum Smart Contracts and Rug Pulls}
+\smallskip
+\noindent
+\textbf{Ethereum Smart Contracts:}
+    The Ethereum blockchain~\cite{EthereumWhitepaper} was launched in 2015, bringing with it Turing-complete smart contracts.
+    Ethereum is currently the second largest public blockchain with a market capitalization exceeding USD349 billion~\cite{EthMarketCap} for its native Ether token.
+    These smart contracts are generally written in the Solidity~\cite{Solidity} language and then compiled to bytecode targeting the Ethereum Virtual Machine, which has numerous popular implementations.
+
+\smallskip
+\noindent
+\textbf{ERC-20 Tokens and Rug Pulls:}
+ERC-20 tokens~\cite{ERC20TokenStandard} are the most popular standard in the Ethereum ecosystem.
+These are fungible tokens, standardized for interoperability.
+This standardization additionally allows them to be easily listed on decentralized exchanges (DEXs) such as Uniswap~\cite{uniswap_protocol}, which facilitate the exchange of tokens without the need for centralized authority.
+They are also a popular target for rug pulls.
+
+As highlighted by prior work~\cite{trapdoor}, a common trap door rug pull pattern is as follows: 1) list these tokens on a DEX, paired with high-value tokens to inject initial value 2) allow users to increase their value by purchasing them 3) use a trap door to prevent users from selling their tokens 4) withdraw the inflated value of these tokens.
+While we do not explicitly evaluate the DEX interaction in this work, we find that modelling this is unnecessary to find the features which enable such trap door patterns.
+
+\subsection{Fuzzing Smart Contracts}
+\smallskip
+\noindent
+\textbf{Why fuzzing is popular in smart contracts:}
+Fuzzing is a dynamic analysis technique.
+It generates input as test cases with the aim of discovering vulnerabilities in a given program.
+For smart contracts, these test cases take the form of sequences of transactions, often termed seeds, each of which is made by a particular user to call a particular function for a target stateful smart contract or set of smart contracts.
+Fuzzing has been used extensively since 2018~\cite{contractfuzzer_2018} to reveal vulnerabilities in Ethereum smart contracts.
+It is attractive as it avoids the need for heavy manual specification and modelling in formal verification, as well as issues such as path explosion in symbolic execution.
+These generated transaction sequences are typically run on an Ethereum Virtual Machine with a deployment of the contract being tested, which ensures that there are few false positives in the sense that they are in principle replayable.
+
+\smallskip
+\noindent
+\textbf{How fuzzing typically works for smart contracts:}
+The typical approach to smart contract fuzzing is to construct a corpus of initial seeds, then mutate them to find the target vulnerabilities \cite{fuzzer_survey_2024}.
+There is a wide gamut of techniques to guide this mutation, including use of runtime feedback such as coverage and prior static analysis such as data dependency.
+Vulnerabilities are generally determined by test oracles, which are either user-specified or general purpose.
+As an example, a common oracle identifies suicidal smart contracts, which are smart contracts that can be destroyed through the \texttt{selfdestruct} instruction by an arbitrary user.
+
+
+\smallskip
+\noindent
+\textbf{How \spoilsport differs from existing fuzzers:}
+\spoilsport is primarily differentiated by its target task - rather than seeking to find security vulnerabilities, it finds \approach{}-style goal violations and conducts motivation analysis.
+Instead of using general test oracles or specifying properties which signal security vulnerabilities, the specification is given in the semantics of roles and goals.
+Secondarily, \spoilsport is differentiated by some implementation details of the fuzzer itself.
+The novel difference is that it introduces a preliminary step prior to generating the initial seeds.
+This step is to find a meaningful starting state before beginning analysis.
+By meaningful, we mean that the state captures important characteristics of the contract being used in the wild, such as that tokens are distributed among multiple users.
+As further discussed in \autoref{ss:finding-reasonable-starting-state}, the starting states used by fuzzers often do not prioritize usage-realism, clone the potentially complex blockchain state or are manually specified in deployment scripts.
+Usage-realism of the starting state is particularly important to us as \spoilsport is explicitly aimed at unearthing motivation dynamics of users in the wild.
+
+\subsection{Finding Meaningful Starting States}
+\label{ss:finding-reasonable-starting-state}
+Initializing smart contracts to a meaningful starting state is a task that is not well studied.
+Current approaches include:
+\begin{enumerate}
+    \item \textit{Start from deployment.}
+        This disregards the need for a reasonable starting state, putting the burden on the fuzzer to find one as an emergent intermediate step as it searches the state space~\cite{sfuzz_icse20,contractfuzzer_2018,echidna}.
+    \item \textit{Manual test harness.}
+        These are deployment scripts mostly used by practitioners, either replaying a sequence of specified transactions or directly modifying state variables by writing directly to storage slots~\cite{foundry_fuzz,echidna}.
+        The issue with specifying transactions is that manual per-contract effort precludes large-scale smart contract analysis.
+        The issue with directly modifying state variables is that the resulting state may not be reachable through actual transaction sequences, which may cause false positive found issues and false negative missed issues.
+    \item \textit{Fork blockchain state.} 
+        By forking blockchain state ~\cite{echidna,medusa,ityfuzz_issta23}, the fuzzer has a starting point of usage-realism.
+        However, there are three disadvantages of this.
+        The first is that such replication cannot be done on smart contracts that are not yet deployed or transacted with.
+        The second is that updating deployed smart contract systems is often troublesome as smart contract deployments are immutable, and workarounds for upgrades are often gated by timelocks and voting mechanisms.
+        The third is that the current contract state may be complex and therefore pass on this complexity to the fuzzer to navigate.
+    \item \textit{Find interesting states.}
+        Another approach is to attempt to find interesting states~\cite{smartian_ase21,ConFuzzius_eurosp21}.
+        Here, interesting is defined in terms such as coverage, data dependency and common vulnerability patterns.
+        While this may improve the efficiency of detecting vulnerabilities, the states found are orthogonal to the usage-realism of meaningful starting states.
+\end{enumerate}
+
+We propose the use of the \approach{} role/goal semantics to declaratively specify characteristics of a valid starting state.
+We then use \spoilsport{} to reach such a starting state.
+For instance, for our evaluation of ERC-20 contracts, we specify the following:
+\begin{enumerate}
+    \item The configured number of users should each have at least 1000 tokens
+    \item At least one user should be liquid, meaning that they are able to transfer their tokens to any other user in our bounded address space.
+\end{enumerate}
+
+This is a reasonable intermediate between full replay of transactions and starting from deployment as it captures the core characteristics of usage-realism: that there are tokens distributed among users and that at least one user is liquid.
+With these semantics and the key variables pre-identified, we declare this specification once in 27 lines of code and use it for all evaluated ERC-20 contracts.

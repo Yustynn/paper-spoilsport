@@ -1,0 +1,41 @@
+\smallskip
+\noindent
+\textbf{RQ3 (New Information on Rug Pull Mechanisms):}
+We note that it is difficult to classify some features cleanly as rug pull mechanisms.
+For instance, the \texttt{decreaseAllowance()} mechanic may be cleanly classified as a rug pull mechanic as its deceptive naming and implementation imply that it will be used fraudulently.
+However, there are 12 contracts with transparently-named and correctly-implemented \texttt{pause()} functions which are all \textit{Anti-Motivated} (work against the transactor's own goals) as they globally halt all token transfers, including those by the attacker.
+This could be used to halt token transfers while the attacker drains the accumulated paired tokens from a decentralized exchange, but it is also a feature that is commonly found in ERC-20 contracts~\cite{chi-end-user}.
+While nearly all found goal violations may be used to further rug pulls, we do not provide a clean classification for this reason.
+
+Goal violations provide four interesting sources of information during analysis.
+The first is whether the goal is already violated upon state initialization.
+1,253 \textit{sale-restrict} contracts are labelled under the \textit{sale-restrict} root cause, which is effected by disallowing all non-privileged users from selling their tokens.
+However, 90.4\% of these contracts were not immediately violated upon state initialization.
+This informs us that such contracts are capable of allowing users to trade tokens normally prior to the attacker restricting sales.
+
+The second and third are the functions used in transactions and the roles of the transactors that call them.
+We note that the \textit{sale-restrict} \liquidity violations come from 16 different sequences of function calls.
+Additionally, analyzing multiple goal violations within the same smart contract can reveal further detail.
+For these \textit{sale-restrict} contracts, 105 of them each have two \liquidity violations of the \owner calling the non-standard function \texttt{transfernewun()} and any user role calling the seemingly-innocuous function \texttt{transferFrom()}.
+Upon manual analysis, we note that the first call to \texttt{transferFrom()} restricts that first recipient from further reception through the \texttt{transfer} function.
+This is misclassified under the dataset's taxonomy, as it uses a \textit{Blacklist} root cause, rather than the \textit{Sale-restrict} root cause.
+This \texttt{Blacklist} implementation is particularly elegant because it keeps the on-chain data looking clean as calls to functions named \texttt{transferFrom} are not suspicious, and because it operates as an ordinary \texttt{transferFrom} function after the first call.
+In practice, the first \texttt{transferFrom()} call is generally to a liquidity pair on a decentralized exchange (DEX).
+This thus allows the owner to add liquidity and then prevent subsequent selling of tokens by preventing victim \holder{}s from selling their tokens to that DEX without restricting them from purchasing.
+This then allows the owner to withdraw the accumulated purchase liquidity.
+The \texttt{transfernewun()} function implements the ability for the \owner to manually change the contract address.
+
+The fourth is the motivation analysis.
+The \textit{Motivated} sequences signal that the underlying transactors' goals are aligned with the goal violations, making them particularly important to inspect.
+964/989 of the \textit{Motivated} transaction sequences are \minsupply violations which allow the \owner to arbitrarily generate tokens.
+While these should be \textit{Token Generation} features, they are not labelled as such in the dataset.
+These use various levels of obfuscation to mislead end-users.
+Two of these are transparently named \texttt{mint()}, signalling token generation capability.
+954 use the name of an internal, not publicly-accessible function (\texttt{\_mint()} in the frequently-used OpenZeppelin~\cite{OpenZeppelinContracts} ERC-20 implementation, but make it accessible.
+This makes the \texttt{\_mint()} functions seem innocuously inaccessible at first glance.
+Most misleadingly, six of these use function names which signal different behavior, such as \texttt{\_BURN()}, \texttt{blacklist()} and \texttt{work()}.
+
+
+\begin{results}
+    Goal violations enrich the dataset by revealing 105 misclassifications, reveal 964 unlabelled \textit{Token Generation}-type rug pull mechanics, and provide examples of rug mechanics being used.
+\end{results}

@@ -1,0 +1,40 @@
+\section{Related Work}
+\label{ss:sec:related_work}
+
+\subsection{Trap Door Rug Pulls}
+A recent systemization of knowledge~\cite{SoKRugPull2025} develops an overarching rug pull taxonomy and compiles the dataset we use in this work.
+Various works focus on detection of these rug pulls.
+Similar to us, TokenAuditor~\cite{tokenauditor_qrs22} uses a fuzzing-based approach.
+Pied Piper~\cite{pied-piper} first performs static analysis with datalog to detect trap door candidates and then validates them through directed fuzzing.
+Several works~\cite{do-not-rug_math22,trade-or-trick_acs22,trapdoor} find rug pulls through heuristics and machine learning techniques.
+Two of these works~\cite{do-not-rug_math22,trapdoor} center on tokens which were listed on Uniswap~\cite{uniswap_protocol}.
+These works focus on particular features of rug pulls in order to unearth them.
+However, our approach and tool look for general goal violations within ERC-20 contracts.
+With the exception of the state initialization procedure, we do not tailor our search to rug pulls in particular.
+This frees us from dependence on particular characteristics of rug pull smart contracts.
+
+\subsection{Smart Contract Fuzzers and State Initialization}
+Wu et al present a recent survey on smart contract fuzzers~\cite{fuzzer_survey_2024}.
+Similar to us, several works use static and dynamic dataflow-based guidance~\cite{smartian_ase21,ethploit,ir-fuzz_ifs23} to construct targeted transaction sequences.
+Additionally, many fuzzers use code coverage~\cite{sfuzz_icse20,ityfuzz_issta23,reguard} and branch distance~\cite{sfuzz_icse20,ir-fuzz_ifs23,ityfuzz_issta23} in order to prioritize interesting seeds. 
+Combining fuzzing and symbolic execution, some works leverage symbolic analysis in order to solve difficult-to-reach constraints~\cite{ConFuzzius_eurosp21,ilf_ccs19}.
+Other works employ machine learning techniques to guide transaction sequence generation~\cite{rlf_ase22,ilf_ccs19}.
+In general, these fuzzers are oriented at discovering bugs and vulnerabilities, which is a distinct task from finding goal violations.
+While these techniques are useful to improve our tool, our task required a custom fuzzer to tightly integrate the role/goal specification format, including optimization and call capabilitiy goals, and implement the motivation analysis.
+IR-Fuzz~\cite{ir-fuzz_ifs23} highlights that many fuzzers expend excessive energy around state initialization.
+Similarly, our state initialization methodology is oriented at finding goal violations more efficiently.
+However, our aim is to find usage-realistic initial states that are conducive to goal analysis, rather than conducive to finding bugs and vulnerabilities.
+
+\subsection{Testing Beyond Traditional Bugs and Vulnerabilities in Smart Contracts}
+There are two research directions which move beyond traditional bugs and vulnerabilities.
+The first targets economic security, searching for profit-generating exploits~\cite{DeFiSoK2023,ClockworkFinance} rather than incorrect implementations.
+The Clockwork Finance Framework~\cite{ClockworkFinance} employs formal techniques to compose user-defined models of the underlying mechanisms implemented through smart contracts in order to reason about their economic security properties.
+Lanturn~\cite{Lanturn} uses adaptive learning directly on EVM bytecode to generate profitable transaction sequences.
+The second research direction is in fairness verification.
+Zeus~\cite{zeus_ndss18} searches for violations of specified business logic within implementations of smart contracts.
+FairCon~\cite{fse20-fairness} uses properties from mechanism design literature to evaluate the fairness of auctions in DeFi.
+FairChecker~\cite{fairchecker} proposes two general properties which detect if attackers may gain profit without cost.
+Both directions have overlap with our task of finding end-user goal violations as what makes economic attacks and fairness violations concerning is that they violate end-user goals.
+Our task differs from economic security as it is additionally concerned with non-economic goals, such as voting outcomes in DeFi governance.
+It differs from fairness verification in that we are interested in identifying goal violations even if the underlying protocol is fair as end-users may not have accurate understandings of these protocols.
+This is motivated by prior work~\cite{mentalmodel-soups,chi-end-user} which shows that end-users often misunderstand important mechanics of the blockchain and smart contracts.

@@ -1,0 +1,64 @@
+\documentclass[acmsmall,screen,review,anonymous]{acmart}
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+
+\usepackage{palatino} % Use the Palatino font by default
+\usepackage[style=numeric,natbib=true,sorting=none]{biblatex} % Use numeric citation style [1], [2], etc.
+
+\addbibresource{main.bib} % The filename of the bibliography
+\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+
+
+% \usepackage[a4paper,margin=1in]{geometry}
+\usepackage{algorithmic}
+% \usepackage[hidelinks]{hyperref}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{balance}
+\usepackage{booktabs}
+\usepackage{cancel}
+\usepackage{caption}
+\usepackage{colortbl}  % for coloring table rules
+\usepackage{enumitem}
+\usepackage{fancybox}
+\usepackage{framed}
+\usepackage{graphicx}
+\usepackage[htt]{hyphenat} % globally allow hyphenations to break lines
+\usepackage{listings}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{pifont}    % provides the \ding command
+\usepackage{pdflscape} % for landscape env
+\usepackage{subcaption} % supercedes subfig package
+\usepackage{textcomp}
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes.geometric, fit, calc}
+\usepackage{xurl}
+\usepackage{xcolor}
+
+% Reduce hyphenation in normal text (higher = less hyphenation)
+\hyphenpenalty=2000
+\exhyphenpenalty=2000
+
+\input{custom}
+
+
+
+\title{Goal-Directed Fuzzing ERC-20 Rug Pulls}
+
+\begin{document}
+\maketitle
+
+\input{components/introduction}
+\input{components/background}
+\input{components/overall_workflow}
+\input{components/evaluation_setup}
+\input{components/results}
+\input{components/discussion}
+\input{components/related_work}
+\input{components/threats_to_validity}
+\input{components/conclusion}
+
+
+\end{document}

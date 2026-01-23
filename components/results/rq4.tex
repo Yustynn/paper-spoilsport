@@ -1,0 +1,64 @@
+
+\smallskip
+\noindent
+\textbf{RQ4 (Comparison to \approach{}):}
+
+
+\begin{table}[htbp]
+\centering
+\caption{
+    Comparison of \approach and \spoilsport on goal violation detection.
+    `\# Viol. Contracts' reports the number of contracts with at least one goal violation. `\# Viol.' reports the total number of violation sequences found.
+    `Time (s)' reports the total time for solving each goal in seconds, excluding state initialization.
+    }
+\begin{tabular}{|>{\centering\arraybackslash}m{1.5cm}|>{\centering\arraybackslash}m{2.5cm}|c|c|c|c|c|c|}
+\hline
+& & \multicolumn{3}{c|}{\textbf{\approach}} & \multicolumn{3}{c|}{\textbf{\spoilsport}} \\
+\cline{3-8}
+\textbf{Role} & \textbf{Goal} & \makecell{\textbf{\# Viol.}\\\textbf{Contracts}} & \makecell{\textbf{\#}\\\textbf{Viol.}} & \makecell{\textbf{Time}\\\textbf{(s)}} & \makecell{\textbf{\# Viol.}\\\textbf{Contracts}} & \makecell{\textbf{\#}\\\textbf{Viol.}} & \makecell{\textbf{Time}\\\textbf{(s)}} \\
+\hline
+\multirow{3}{1.2cm}{\centering\holder}
+    & \maxowned & 58 (44\%) & 65 & 7525.9 & \textbf{63 (48\%)} & \textbf{89} & \textbf{17.6} \\
+\cline{2-8}
+    & \minsupply & 38 (29\%) & 39 & 3346.4 & \textbf{39 (30\%)} & \textbf{40} & \textbf{23.4} \\
+\cline{2-8}
+    & \liquidity & 23 (17\%) & 31 & 13514.2 & \textbf{38 (29\%)} & \textbf{53} & \textbf{1140.0} \\
+\hline
+\owner & \maxsupply & 53 (40\%) & 58 & 3120.4 & \textbf{59 (45\%)} & \textbf{85} & \textbf{12.5} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{TOTAL}} & 76 (58\%) & 193 & 27507.0 & \textbf{82 (62\%)} & \textbf{267} & \textbf{1193.0} \\
+\hline
+\end{tabular}
+\label{ss:table:rq4}
+\end{table}
+
+Despite the bounded nature of fuzzing compared to symbolic execution, \spoilsport performs significantly better even with a lower time budget (\textit{see} \autoref{ss:table:rq4}).
+We attribute this primarily to path explosion of the \approach{} solver.
+Overall, it finds 74 more goal violations (+38.3\%) while finishing ~23x faster.
+Among the goals, the \liquidity goal is notably the slowest.
+This is due to the \texttt{transfer} function typically having more control flow dependencies, which leads to a larger candidate space for transactions to prepend while constructing a solution.
+Additionally, call capability goals also add more overhead as they require more transaction executions in order to ensure reachability across different arguments.
+In the worst case, checking if the \liquidity goal is violated takes as many transactions as users in our bounded address space.
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/gs_violations_by_goal_and_motivation.png}
+	\caption{Counts of goal violations found by \spoilsport{} on the \approach dataset, broken down by goal and motivation label.}
+	\label{ss:fig:rq4-violations-by-motivation}
+\end{figure*}
+
+
+
+
+We naturally find that the top code features responsible for each goal violation are the same as those found by \approach and have a similar motivation label distribution (\textit{see} \autoref{ss:fig:rq4-violations-by-motivation}).
+The top responsible feature for both \maxsupply and \maxowned goal was \feature{burn}, accounting for 86\% and 82\% of their violations respectively.
+For \minsupply{}, \feature{mint} accounted for 95\% of the goal violations.
+For \liquidity{}, \feature{pause} accounted for 69\% of the goal violations.
+Of note, \spoilsport discovered a novel though unconcerning \feature{mint}-based violations for \liquidity in the \textit{RigoToken} (\texttt{0x4fbb\allowbreak 3500\allowbreak 52bc\allowbreak a541\allowbreak 7566\allowbreak f188\allowbreak eb2e\allowbreak bce5\allowbreak b19b\allowbreak c964}) contract. 
+By minting an extremely large amount of tokens to a target user, that user is no longer able to make the normally benign and inert transfer of their own full holdings to themselves.
+This triggers an integer overflow and causes the transaction to revert.
+
+
+\begin{results}
+    \spoilsport finds more goal violations (+38.3\%) while finishing much faster (~23x) than \approach{}.
+\end{results}

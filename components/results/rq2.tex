@@ -1,0 +1,59 @@
+\smallskip
+\noindent
+\textbf{RQ2 (Correlation with Known Rug Pull Types:)}
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[width=\linewidth]{img/rp_violations_by_goal_and_motivation.png}
+	\caption{Counts of goal violations found by \spoilsport{} in the rug pull dataset, broken down by goal and motivation label.}
+	\label{ss:fig:rq2-violations-by-motivation}
+\end{figure*}
+
+\begin{table}[h]
+\centering
+\caption{Goal violations found by \spoilsport{} on rug-pull contracts (n=1,324).}
+\label{ss:table:rq2}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Role} & \textbf{Goal} & \textbf{\# Viol.} & \textbf{\# Viol.} & \textbf{Time} & \textbf{Avg Time} \\
+              &               & \textbf{Contracts} & & & \textbf{/ Viol.} \\
+\hline
+\multirow{3}{*}{\holder}
+    & \maxowned  & 81 (6\%) & 402   & 3h 4m & 27.4s \\
+\cline{2-6}
+    & \minsupply & 978 (71\%) & 982   & 39.8s & <0.1s \\
+\cline{2-6}
+    & \liquidity & 1,155 (84\%) & 1,283 & 4h 19m & 12.1s \\
+\hline
+\owner & \maxsupply & 40 (3\%) & 64 & 44m & 40.8s \\
+\hline
+\multicolumn{2}{|l|}{\textbf{TOTAL}} & \textbf{1,257 (91\%)} & \textbf{2,731} & \textbf{8h 7m} & \textbf{10.7s} \\
+\hline
+\end{tabular}
+\end{table}
+
+In \autoref{ss:table:rq2}, we present goal violations detected from the 1,324 rug pull contracts that were successfully initialized in \textbf{RQ1}.
+Overall, \spoilsport{} took a mean of 10.7s to find each of the 2,731 goal violations.
+Across the labelled rug pull types, we find at least one goal violation in the corresponding goal for 83.6\% of contracts.
+The largest number of violations found (1,155) was in \liquidity{}.
+This reflects the dataset's original distribution, which is strongly dominated by \textit{Transaction Limitation}-based rug pulls.
+This type works by limiting end-user transactions, generally to stop them from selling their tokens.
+
+We found \liquidity violations in 1,143/1,303 (87.7\%) of the \textit{Transaction Limitation} rug pulls.
+156 (12.0\%) of these contracts timed out before completing the goal violation search.
+The majority of these were attributed to the \owner calling \texttt{decreaseAllowance()}.
+735 (73.6\%) of these are caused by the \owner calling the \texttt{decreaseAllowance()} function.
+This function name misleadingly implies that it implements the standard \textit{allowance} feature ERC-20 specification~\cite{ERC20TokenStandard} which should allow users to control who they permit to spend their funds.
+Upon manual analysis, we find that it instead restricts all token transfers not made by a privileged address, appropriately setting up the \textit{Sale-restrict} scenario.
+
+Though a small minority, we importantly fail to detect the labelled root causes of 6/9 (66.7\%) of the next most prominent rug pull type.
+This is \textit{Token Generation}, in which additional tokens are covertly generated.
+This failure is largely attributed to how we specify the \minsupply goal, which hides the assumption that the \texttt{totalSupply} variable accurately tracks the total token supply.
+Deceptively, the missed contracts tend to increase an attacker's owned tokens without correspondingly updating the \texttt{totalSupply} variable.
+This highlights a flaw in our initial specification, which may in future be improved on to track the sum of all users' token holdings rather than the \texttt{totalSupply} variable.
+
+
+
+\begin{results}
+    83.6\% of the rug pull types had corresponding violated goals among the 2,731 general ERC-20 violations, validating that these goal violations are consistent with the original dataset's coarse classification.
+\end{results}

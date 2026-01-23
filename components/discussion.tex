@@ -1,0 +1,29 @@
+\section{Discussion}
+\label{ss:sec:discussion}
+
+
+\smallskip
+\noindent
+\textbf{Avoiding dependence on particular features:}
+By sticking purely to generic user roles and goals, we were able to avoid particularities of features during our rug pull analysis.
+This is a fundamentally different approach to existing detectors, which index on known features~\cite{pied-piper,do-not-rug_math22}.
+By avoiding fitting to these features, our approach may be robust to novel rug pull patterns which existing detectors may miss.
+This is supported by our ability to detect rug pull concerns which were beyond the original dataset's labels, as shown in \textbf{RQ3}.
+However, a trade off is that our found goal violations require manual inspection in order to understand.
+
+% \todo
+% \smallskip
+% \noindent
+% \textbf{Comorbidity of risky features:}
+% \todo
+% We note that many rug pull contracts have multiple features which would both violate user expectations as well as facilitate rug pulls.
+
+
+\smallskip
+\noindent
+\textbf{Unclear classification of rug pulls based solely on features:}
+While we examine many clearly hidden features that imply malice, we note that other more cleanly implemented features can only be classified as malicious or benign based on usage.
+For instance, the USD Tether~\cite{TetherWhitepaper} contract, which houses the most popular ERC-20 smart contract, is centrally controlled by a single wallet with a \feature{mint} feature that allows it to generate an arbitrary amount of tokens.
+This could be used to turn a rug pull-style quick profit by generating and then selling tokens, but this is unlikely due to other incentives and no abuse has ever been recorded.
+Thus on an implementation-level, USD Tether has the necessary features to actuate a rug pull, yet by usage it is clearly not a rug pull.
+This highlights the importance of surfacing risky features rather than cleanly classifying a smart contract as a rug pull or not after-the-fact.

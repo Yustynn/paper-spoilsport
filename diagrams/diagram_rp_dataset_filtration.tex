@@ -1,0 +1,31 @@
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    box/.style={rectangle, draw, rounded corners, minimum height=1.2cm, minimum width=1.5cm, align=center, font=\small},
+    arrow/.style={->, thick, >=stealth},
+    lbl/.style={font=\scriptsize}
+]
+% Boxes
+\node[box] (start) {2,391\\Rug Pull\\Contracts};
+\node[box, right=of start] (source) {2,279\\w/ Source};
+\node[box, right=of source] (erc20) {2,002\\is ERC-20};
+\node[box, right=of erc20] (keys) {1,680\\Key Vars};
+\node[box, right=of keys, fill=green!20] (final) {\textbf{1,376}\\No Ext\\Deps};
+
+% Arrows with split labels (above and below)
+\draw[arrow] (start) -- (source) node[midway, above, lbl] {Source} node[midway, below, lbl] {available};
+\draw[arrow] (source) -- (erc20) node[midway, above, lbl] {is} node[midway, below, lbl] {ERC-20};
+\draw[arrow] (erc20) -- (keys) node[midway, above, lbl] {Key vars} node[midway, below, lbl] {detected};
+\draw[arrow] (keys) -- (final) node[midway, above, lbl] {No ext.} node[midway, below, lbl] {calls};
+
+% Percentage labels below boxes
+\node[below=0.1cm of start, font=\scriptsize] {100\%};
+\node[below=0.1cm of source, font=\scriptsize] {95.3\%};
+\node[below=0.1cm of erc20, font=\scriptsize] {83.7\%};
+\node[below=0.1cm of keys, font=\scriptsize] {70.3\%};
+\node[below=0.1cm of final, font=\scriptsize] {\textbf{57.5\%}};
+\end{tikzpicture}
+\caption{Dataset filtration pipeline for rug pull evaluation.}
+\label{ss:fig:dataset-filtration}
+\end{figure}

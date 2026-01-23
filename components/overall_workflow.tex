@@ -1,0 +1,152 @@
+\section{Overall Workflow}
+\label{ss:sec:overall_workflow}
+
+
+\input{diagrams/diagram_overall_architecture}
+
+\subsection{Architecture Overview}
+We present the overall workflow in \autoref{fig:spoilsport-architecture}.
+Similar to \approach{}, \spoilsport takes the solidity source code of the target contract and the role/goal specification as input.
+In addition, \spoilsport also takes the specification of state characteristics using role/goal semantics for its state initialization stage.
+
+As final output, it delivers labeled goal violations complete with the same motivation analysis presented in \autoref{ch:goalseeker}.
+
+The pipeline consists of four processing stages:
+\begin{enumerate}
+    \item \textit{Static Analysis} extracts function-level summaries to guide the fuzzer.
+    \item \textit{State Initialization} finds meaningful starting states using the user-provided state characteristics specification.
+    \item \textit{Goal Violation Search} performs goal-directed fuzzing from the starting state to find violating transaction sequences.
+    \item \textit{Motivation Analysis} annotates the found violations using the methodology from \autoref{ch:goalseeker}.
+\end{enumerate}
+
+\subsection{Static Analysis}
+Here, we generate function-level summaries which are more lightweight than in \approach{}.
+Rather than extract full path conditions and state variable transformations, we retrieve the following:
+\begin{enumerate}
+    \item \textit{Write variables:} State variables which the function modifies.
+    \item \textit{Control-flow variables:} State variables which are involved in conditionals and \texttt{require}/\texttt{assert} statements.
+    \item \textit{Parameter types:} Type information for function parameters
+\end{enumerate}
+
+Additionally, on a contract-level, we save all hardcoded addresses present in the source code.
+These are often used to encode privileged addresses such as admin wallets and fee recipients.
+These addresses are used as concrete users during fuzzing.
+
+\subsection{Goal-Directed Fuzzing}
+We now detail the fuzzing procedure which underlies \textit{State Initialization} and \textit{Goal Violation Search}.
+Once state initialization transaction sequence is found, that sequence is applied prior to our search for goal violations.
+
+In \spoilsport, we treat seeds as a mix of transactions with concretized functions, and transactions with unconcretized functions which leave their arguments and caller unspecified.
+
+We direct the fuzzer to satisfy the specified goals during \textit{State Initialization} as these are interpreted as desired state characteristics to search for.
+Inversely, we direct the fuzzer to violate the specified goals during the \textit{Goal Violation Search}.
+While we use the same seed generation and seed mutation phases across these stages, we use more complex seed scheduling for \textit{State Initialization} as it involves directing the fuzzer with multiple goals.
+
+\smallskip
+\noindent
+\textbf{Seed generation:}
+Similar to \approach{}, we parse the goal specification to retrieve relevant state variables.
+For instance, for a \maxsupply goal, we retrieve the \texttt{totalSupply} state variable.
+We then populate our initial corpus with single unconcretized function calls of functions which modify these relevant state variables, based on our function summaries.
+As any goal violations necessarily have to modify relevant state variables, this allows us to initialize our seeds with these functions as their end targets.
+
+\smallskip
+\noindent
+\textbf{Seed mutation:}
+We attempt to execute a seed by sampling its unconcretized function parameters. 
+If a seed fails to execute, we extend it by prepending candidate enabling transactions. These candidates are functions which modify the variables which the failing transaction's control-flow depends on.
+This uses a similar insight to~\cite{ethploit}, constructing a transaction sequence from back to front.
+
+\smallskip
+\noindent
+\textbf{Seed scheduling:}
+We implement a round-robin approach to rotate between unconcretized function candidates.
+In addition, during \textit{Goal Violation Search}, we employ a simple breadth-first search to prioritize shorter transaction sequences.
+This is due to us solving for the violation of only a single goal at a time.
+However, during \textit{State Initialization}, we augment this breadth-first search by prioritizing the seeds which have solved the most goals.
+For instance, a transaction sequence of length five which has solved three goals would get precedence over a transaction sequence of length 4 which has solved two goals.
+
+
+\subsection{Motivation Analysis}
+We implement the same motivation analysis detailed in \autoref{ch:goalseeker}.
+The purpose of this is to capture the effects on transactors' goals in a goal violating transaction sequence, as well as provide a single metric to communicate how well motivated the overall sequence was in terms of these goals.
+
+We first label each transaction as the maximum of this ordering on the set of effects for its transactor's goals: \textit{goal-conforming} > \textit{goal-violating} > \textit{goal-neutral}.
+For instance, if a transaction conforms to one of the transactor's goals while violating another, we label it as \textit{goal-conforming} in order to signal that there is some motivation for the transactor to make the transaction.
+
+We then label the overall transaction sequence as either \textit{Motivated} (all transactions are \textit{goal-conforming} or \textit{goal-neutral}), \textit{Anti-Motivated} (all transactions are \textit{goal-violating} or \textit{goal-neutral}), \textit{Mixed Motivation} (there are both \textit{goal-conforming} and \textit{goal-violating} transactions in the sequence) or \textit{Motivation-Neutral} (all transactions are \textit{goal-neutral}).
+
+
+\subsection{Specification of Roles and Goals}
+We use the \approach{} framework to specify user roles and goals, keeping them largely similar to the original work.
+
+\spoilsport takes user-supplied specification of roles and goals in the \approach{} framework.
+These goals are used in place of bug or vulnerability test oracles.
+The \approach{} framework allows for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
+As discussed in \autoref{ch:goalseeker}, goal violations differ from traditional bugs and vulnerabilities in that they are independent of the developer's intention.
+
+
+
+\smallskip
+\noindent
+\textbf{Roles and Goals for Goal Violation Search:}
+We largely reuse the specification developed in \autoref{ch:goalseeker}.
+This is to demonstrate that no special tailoring is required for this to find useful rug pull mechanics.
+We restate this specification below.
+
+
+There are two roles involved in this analysis.
+The first is a generic \holder role, which is defined as any user whose address is a key in the contract's \texttt{balances} variable.
+This mapping variable is a frequently implemented pattern which associates user addresses to unsigned integers which track the amount of tokens they own.
+However, such mappings default all keys to a value of $0$, making every user trivially a \holder.
+The second is the \owner role, defined as the user who deploys the smart contract.
+Internally, we develop a domain-specific language for \spoilsport and specify \holder as \texttt{balances[AddressUser] >= 0} and for the \owner as \texttt{AddressUser == AddressDeployer}.
+The roles and goals are specified in 42 lines of Python code.
+
+For the \textit{Token Holder} role, we specify the following goals:
+\begin{enumerate}
+    \item \textit{\rev{\maxowned}}: $\max$ \texttt{balances[AddressUser]}.
+        This optimization goal captures the profit-maximizing goal of a user, which is to own as much value (measured in tokens) as possible.
+    \item \textit{\rev{\minsupply}}: $\min$ \texttt{totalSupply}.
+        This optimization goal is also a profit-maximizing goal, capturing the intuition that a lower token supply increases the value of each individual token due to increased rarity.
+    \item \textit{\liquidity}: $s \leadsto\texttt{AddressUser.transfer(balances[AddressUser])}$.
+        This call capability goal captures the natural user expectation that they have full control over spending the tokens which they own.
+        We define this as a user being able to transfer their full holdings to any other user, at any point from the start of analysis.
+\end{enumerate}
+
+We depart from the original specification by making a single improvement which improves the intention of the general specification rather than targeting rug pulls in particular.
+We exclude goal violations where a user reduces their own holdings (naively violating \maxowned{}), specified through the constraint \texttt{UserCaller != UserAddress}.
+This is in keeping the principle behind \liquidity{}, which is that end-users should have control over their funds.
+This allows us to remove the \texttt{transfer()} function filter in the original specification, which was introduced to exclude trivial cases of a \holder violating their own \maxowned goal.
+However, we maintain the original filter of the \texttt{transferFrom()} function violating the \maxowned{} goal.
+The \texttt{transferFrom()} function is typically used by a user who has been approved by the \holder to spend their funds.
+Due to the expectedness of this ability, this was excluded in the original specification as well.
+
+During our comparison with \approach{}, we suspend this improvement.
+This is so that we may have an accurate comparison across the two solvers.
+
+
+In keeping with \autoref{ch:goalseeker}, we specify the following goal for the \textit{Contract Owner} role:
+\begin{enumerate}
+    \item \textit{\rev{\maxsupply}}: $\max$ \texttt{totalSupply}.
+        Similar to \minsupply{}, this optimization goal is also a profit-maximizing goal but from the perspective of the entire project's value rather than a single user's holdings.
+        This captures the intuition that creating more tokens will increase the market capitalization of the project (though this is relationship is non-linear and subject to market dynamics).
+\end{enumerate}
+
+
+
+\textbf{State Characteristics for \textit{State Initialization}:}
+We specify initial state characteristics which mimic real-world usage of rug pull contracts.
+This is done using the \approach{} framework, in 27 lines of Python code.
+These capture the following scenario: tokens are disbursed among multiple users, and that at least one of those users is liquid.
+As these are characteristics over groups of users, we extend the \approach{} framework by adding quantifiers over goals.
+The characteristics are as follows:
+\begin{enumerate}
+    \item \textit{Disbursal:}
+        $\forall u \in \text{\holder}$, \texttt{balances[u] >= 1000}.
+        This ensures token disbursal of at least 1000 tokens to each user, creating multiple \holder{}.
+    \item \textit{Any Liquidity:}
+    $\exists u \in \text{\holder}$ where $s \leadsto\texttt{AddressUser.transfer(balances[u])}$.
+        At least one \holder is liquid.
+        We note the deliberate choice to not make all users liquid, as many rug pull implementations are designed to disallow non-privileged users from transferring their funds.
+\end{enumerate}
