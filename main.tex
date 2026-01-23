@@ -1,12 +1,9 @@
-\documentclass[acmsmall,screen,review,anonymous,natbib=false]{acmart}
+\documentclass[acmsmall,screen,review,anonymous]{acmart}
 \usepackage[utf8]{inputenc} % Required for inputting international characters
 \usepackage[T1]{fontenc} % Output font encoding for international characters
 
 \usepackage{palatino} % Use the Palatino font by default
-\usepackage[style=numeric,natbib=true,sorting=none]{biblatex} % Use numeric citation style [1], [2], etc.
-
-\addbibresource{main.bib} % The filename of the bibliography
-\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+% Using BibTeX with acmart's built-in natbib support
 
 
 % \usepackage[a4paper,margin=1in]{geometry}
@@ -60,6 +57,10 @@
 \input{components/related_work}
 \input{components/threats_to_validity}
 \input{components/conclusion}
+
+\balance
+\bibliographystyle{IEEEtran}
+\bibliography{main}
 
 
 \end{document}
