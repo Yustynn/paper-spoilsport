@@ -18,17 +18,12 @@ In searching for goal violations, does \spoilsport also uncover the root causes 
 Do the found goal violations effectively disclose new information about rug pull mechanisms in their contracts?
 
 \smallskip
-\textbf{RQ4 (Comparison to \approach{})}
-How quickly and comprehensively does \spoilsport perform at discovering goal violations relative to \approach{}?
-
-\smallskip
 \textbf{RQ1} investigates the efficacy of finding sequences of transactions to transform the smart contract states into ones which resemble characteristics of expected usage.
 \textbf{RQ2} and \textbf{RQ3} inspect the relationship between found goal violations and trap doors in rug pulls.
 Our evaluation does not aim to detect rug pulls in the wild, but rather enrich the ground truth of contracts which are known to be malicious.
 In \textbf{RQ2}, we present goal violation results and investigate whether these violations correspond to the dataset's labelled rug pull types.
 In \textbf{RQ3}, we investigate the goal violations in more detail.
 While our dataset gives us a high-level classification of the rug pull trap door, we wish to understand whether there is useful additional detail about rug pull mechanics which we may retrieve from goal violations.
-Finally, \textbf{RQ4} provides a direct comparison with the prior \approach{} symbolic execution-based solver.
 
 
 \smallskip
@@ -46,7 +41,7 @@ Finally, \textbf{RQ4} provides a direct comparison with the prior \approach{} sy
 
 \smallskip
 \noindent
-\textbf{Setup for rug pull evaluation (\textbf{RQ1-3}):}
+\textbf{Setup for evaluation:}
 We use a dataset from prior work on rug pulls~\cite{SoKRugPull2025}, labelling 2,391 known rug pull contracts under their proposed root cause taxonomy.
 \autoref{ss:fig:dataset-filtration} illustrates our process of filtering to the 1,376 (57.5\%) contracts used for our evaluation.
 Of these, 2,279 have Solidity source code available from Etherscan~\cite{etherscan}.
@@ -63,22 +58,6 @@ This does not allow for reproduction of the exact mechanism of the rug pull (i.e
 As in the full dataset, the trap door labels in this sample are heavily skewed towards \textit{Transaction Limitation} violations (97.7\% of all entries).
 Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged users to transfer their tokens, 3.1\% are due to \textit{Freeze Account} which prevent victim wallet addresses from performing transactions and
 1.4\% are due to \textit{Transfer Block} which globally disables transfers.
-
-\smallskip
-\noindent
-\textbf{Setup for comparison with \approach (\textbf{RQ4}):}
-We use the same set of \numcontracts ERC-20 popular smart contracts which were evaluated in \approach.
-In keeping with \approach{}, we use three users for evaluation and limit to the maximum transaction length found by \approach{}, being two.
-Similarly, we match the \approach{} time budget of 60 seconds per goal for each contract.
-
-We note that comparing the \approach{} approach of symbolic execution to the \spoilsport{} approach of fuzzing requires careful interpretation.
-In general, symbolic execution theoretically guarantees completeness and full path coverage but is limited by path explosion and overapproximations induced by practical optimizations.
-While in theory \approach{}'s general approach may find all sequences of function calls that result in goal violations with no false negatives, in practice it is limited by its time budget and contains false positives induced by optimizations such as bitwidth restriction for large datatypes.
-Fuzzing trades off these completeness guarantees for efficient exploration in many cases.
-As we run with the real bytecode on a full EVM implementation, there are no false positives.
-However fuzzing in general falls victim to other limitations such difficulty generating input that satisfies constraints guarded by magic constants (e.g., a conditional \texttt{if (x = 432498)}, requiring the input $x$ to be exactly $432498$).
-Our comparison is therefore purely on practical utility: given the same role/goal specification and time budget, which of the two solvers finds more goal violations?
-
 
 \smallskip
 \noindent 
@@ -122,11 +101,3 @@ During our \textit{Static Analysis} stage, we use Slither~\cite{Slither} to cons
 We use the Revm \cite{revm} Ethereum Virtual Machine (EVM) implementation as our execution backend.
 The majority of the code is written in Python, with custom Rust bindings for Revm written in PyO3.
 All evaluations were conducted on a 16-inch Macbook Pro (2021 model, M1 Max CPU), the same machine as used in the \approach{} evaluation.
-
-
-% \smallskip
-% \noindent
-% \textbf{Metrics and Measures:}
-% For \textbf{RQ1}, we report the number of contracts for which we could find initial states. Additionally, we report timing statistics to evaluate efficiency.
-% For \textbf{RQ4}, we report the total number of goal violations found by \approach and \spoilsport{}, broken down by goal.
-% We additionally report the total time taken for the solving portion of each goal.
