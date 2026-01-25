@@ -35,42 +35,6 @@ This is consistent with the general pattern of all token being minted to a singl
 \end{figure*}
 
 
-
-\begin{figure}[h]
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[
-    node distance=1cm,
-    txstep/.style={rectangle, draw, rounded corners, align=center, font=\footnotesize, minimum width=1.6cm, minimum height=0.9cm},
-    call/.style={->, >=stealth, thick}
-]
-    % Each node shows Caller.function\n(args)
-    \node[txstep, fill=red!20] (s1) {\texttt{Addr2.DEPLOY}\\\texttt{(name, symbol, supply)}};
-    \node[txstep, right=of s1] (s2) {\texttt{Addr1.transferFrom}\\\texttt{(Addr2, Addr1, amt)}};
-    \node[txstep, right=of s2, fill=red!20] (s3) {\texttt{Addr2.\_mints}\\\texttt{(Addr4, amt)}};
-    \node[txstep, right=of s3] (s4) {\texttt{Addr2.transfer}\\\texttt{(Addr0, amt)}};
-    \node[txstep, right=of s4] (s5) {\texttt{Addr4.transfer}\\\texttt{(Addr3, amt)}};
-
-    % Arrows
-    \draw[call] (s1) -- (s2);
-    \draw[call] (s2) -- (s3);
-    \draw[call] (s3) -- (s4);
-    \draw[call] (s4) -- (s5);
-\end{tikzpicture}%
-}
-\caption{Example non-standard state initialization transaction sequence for the \textit{MrMr} token, with each node corresponding to a transaction.
-The red nodes make use of rug pull mechanics.}
-\label{ss:fig:rq1-mrmr-flow}
-\end{figure}
-
-In \autoref{ss:fig:rq1-mrmr-flow}, we highlight an example of a non-standard state initialization sequence found in the \textit{MrMr} contract (\texttt{0x01{\allowbreak}bcc8{\allowbreak}8d1b{\allowbreak}62e9{\allowbreak}7f9b{\allowbreak}d6a0{\allowbreak}58d1{\allowbreak}f442{\allowbreak}226a{\allowbreak}234ea3}) to show the generality of the state initialization search.
-Here, the \owner{}'s (\textit{Address2}) deployment implicitly blocks all transfers that are not by themselves or a particular hardcoded address (\textit{Address1}) and mints themselves the initial token supply.
-\textit{Address1} then calls a misleading \texttt{transferFrom} function, which succeededs because it passes the two checks of being whitelisted and transferring to the \owner.
-The \owner then uses the misleadingly-named \texttt{\_mints()} function to whitelist \textit{Address4}, allowing it to transfer tokens, and overwrites its balances with a large amount rather than minting tokens.
-This balance overwriting is covert and does not modify \texttt{totalSupply}.
-\texttt{Address2} and \texttt{Address4} then transfer tokens to the remaining two users.
-Our solver has now found a novel path which exploits rug pull mechanics to meet the target characteristics of token disbursal with at least one liquidity user.
-
 This demonstrates that the declarative state specification using role/goal semantics is effective (96.3\% success) and efficient (median 0.52 seconds) for large-scale analysis, even in the adversarial setting of compromised ERC-20 contracts found in the wild.
 
 \begin{result}
