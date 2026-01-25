@@ -43,7 +43,7 @@ As an example, a common oracle identifies suicidal smart contracts, which are sm
 \smallskip
 \noindent
 \textbf{How \spoilsport differs from existing fuzzers:}
-\spoilsport is primarily differentiated by its target task - rather than seeking to find security vulnerabilities, it finds \approach{}-style goal violations.
+\spoilsport is primarily differentiated by its target task - rather than seeking to find security vulnerabilities, it finds violations of specified user goals while also annotating the roles of transactors in the violating transaction sequences.
 Instead of using general test oracles or specifying properties which signal security vulnerabilities, the specification is given in the semantics of roles and goals.
 Secondarily, \spoilsport is differentiated by some implementation details of the fuzzer itself.
 The novel difference is that it introduces a preliminary step prior to generating the initial seeds.
@@ -75,7 +75,7 @@ Current approaches include:
         While this may improve the efficiency of detecting vulnerabilities, the states found are orthogonal to the usage-realism of meaningful starting states.
 \end{enumerate}
 
-We propose the use of the \approach{} role/goal semantics to declaratively specify characteristics of a valid starting state.
+We propose the use of the same role/goal semantics which we use to specify user perspectives in order to declaratively specify characteristics of a valid starting state.
 We then use \spoilsport{} to reach such a starting state.
 For instance, for our evaluation of ERC-20 contracts, we specify the following:
 \begin{enumerate}

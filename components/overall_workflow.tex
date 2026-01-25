@@ -6,7 +6,7 @@
 
 \subsection{Architecture Overview}
 We present the overall workflow in \autoref{fig:spoilsport-architecture}.
-Similar to \approach{}, \spoilsport takes the solidity source code of the target contract and the role/goal specification as input.
+\spoilsport takes the solidity source code of the target contract and the role/goal specification as input.
 In addition, \spoilsport also takes the specification of state characteristics using role/goal semantics for its state initialization stage.
 
 As final output, it delivers goal violating transaction sequences.
@@ -19,8 +19,7 @@ The pipeline consists of four processing stages:
 \end{enumerate}
 
 \subsection{Static Analysis}
-Here, we generate function-level summaries which are more lightweight than in \approach{}.
-Rather than extract full path conditions and state variable transformations, we retrieve the following:
+We generate function-level summaries which capture the following information:
 \begin{enumerate}
     \item \textit{Write variables:} State variables which the function modifies.
     \item \textit{Control-flow variables:} State variables which are involved in conditionals and \texttt{require}/\texttt{assert} statements.
@@ -44,7 +43,7 @@ While we use the same seed generation and seed mutation phases across these stag
 \smallskip
 \noindent
 \textbf{Seed generation:}
-Similar to \approach{}, we parse the goal specification to retrieve relevant state variables.
+We parse the goal specification to retrieve relevant state variables.
 For instance, for a \maxsupply goal, we retrieve the \texttt{totalSupply} state variable.
 We then populate our initial corpus with single unconcretized function calls of functions which modify these relevant state variables, based on our function summaries.
 As any goal violations necessarily have to modify relevant state variables, this allows us to initialize our seeds with these functions as their end targets.
@@ -67,22 +66,17 @@ For instance, a transaction sequence of length five which has solved three goals
 
 
 \subsection{Specification of Roles and Goals}
-We use the \approach{} framework to specify user roles and goals, keeping them largely similar to the original work.
-
-\spoilsport takes user-supplied specification of roles and goals in the \approach{} framework.
+\spoilsport takes user-supplied specification of roles and goals.
 These goals are used in place of bug or vulnerability test oracles.
-The \approach{} framework allows for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
-As discussed in \autoref{ch:goalseeker}, goal violations differ from traditional bugs and vulnerabilities in that they are independent of the developer's intention.
+We allow for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
 
 
 
 \smallskip
 \noindent
 \textbf{Roles and Goals for Goal Violation Search:}
-We largely reuse the specification developed in \autoref{ch:goalseeker}.
+We keep the roles and goals general enough to reasonably represent ERC-20 users in general.
 This is to demonstrate that no special tailoring is required for this to find useful rug pull mechanics.
-We restate this specification below.
-
 
 There are two roles involved in this analysis.
 The first is a generic \holder role, which is defined as any user whose address is a key in the contract's \texttt{balances} variable.
@@ -103,19 +97,12 @@ For the \textit{Token Holder} role, we specify the following goals:
         We define this as a user being able to transfer their full holdings to any other user, at any point from the start of analysis.
 \end{enumerate}
 
-We depart from the original specification by making a single improvement which improves the intention of the general specification rather than targeting rug pulls in particular.
-We exclude goal violations where a user reduces their own holdings (naively violating \maxowned{}), specified through the constraint \texttt{UserCaller != UserAddress}.
+Additionally, we exclude goal violations where a user reduces their own holdings (naively violating \maxowned{}), specified through the constraint \texttt{UserCaller != UserAddress}.
 This is in keeping the principle behind \liquidity{}, which is that end-users should have control over their funds.
-This allows us to remove the \texttt{transfer()} function filter in the original specification, which was introduced to exclude trivial cases of a \holder violating their own \maxowned goal.
-However, we maintain the original filter of the \texttt{transferFrom()} function violating the \maxowned{} goal.
+We also filter out \maxowned goal violations which use the \texttt{transferFrom()} function as their terminal function as these violations are generally trivial and consented to.
 The \texttt{transferFrom()} function is typically used by a user who has been approved by the \holder to spend their funds.
-Due to the expectedness of this ability, this was excluded in the original specification as well.
 
-During our comparison with \approach{}, we suspend this improvement.
-This is so that we may have an accurate comparison across the two solvers.
-
-
-In keeping with \autoref{ch:goalseeker}, we specify the following goal for the \textit{Contract Owner} role:
+We specify the following goal for the \textit{Contract Owner} role:
 \begin{enumerate}
     \item \textit{\rev{\maxsupply}}: $\max$ \texttt{totalSupply}.
         Similar to \minsupply{}, this optimization goal is also a profit-maximizing goal but from the perspective of the entire project's value rather than a single user's holdings.
@@ -126,9 +113,9 @@ In keeping with \autoref{ch:goalseeker}, we specify the following goal for the \
 
 \textbf{State Characteristics for \textit{State Initialization}:}
 We specify initial state characteristics which mimic real-world usage of rug pull contracts.
-This is done using the \approach{} framework, in 27 lines of Python code.
+This is done in in 27 lines of Python code.
 These capture the following scenario: tokens are disbursed among multiple users, and that at least one of those users is liquid.
-As these are characteristics over groups of users, we extend the \approach{} framework by adding quantifiers over goals.
+As these are characteristics over groups of users, we extend the role/goal semantics by adding quantifiers over goals.
 The characteristics are as follows:
 \begin{enumerate}
     \item \textit{Disbursal:}

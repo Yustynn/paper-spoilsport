@@ -29,8 +29,8 @@ While our dataset gives us a high-level classification of the rug pull trap door
 \smallskip
 \noindent 
 \noindent \textbf{Heuristic-based detection of key variables:}
-    We implement a refinement on the heuristic-driven detection methodology for the key variables of the \texttt{balances} mapping variable (user token holdings) and \texttt{totalSupply} variable (the sum of all issued tokens), which may take arbitrary names.
-    This is adapted from heuristics used in \approach{} and other work~\cite{fairchecker}.
+    We implement a heuristic-driven detection methodology for the key variables of the \texttt{balances} mapping variable (tracking user token holdings) and \texttt{totalSupply} variable (the sum of all issued tokens), which may take arbitrary names.
+    This is loosely adapted from prior work~\cite{fairchecker}.
     We make use of functions mandated by the ERC-20 specification~\cite{ERC20Spec}.
     For \texttt{balances}, we retrieve the type-matched variable which is read by \texttt{balanceOf()} and written by \texttt{transfer()}.
     If no candidate exists, we additionally check for a variable named \texttt{balanceOf} as that would result in an implicit \texttt{balanceOf} function.
@@ -70,8 +70,7 @@ Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged 
         We also constrained address parameters to select from the available bounded address space only.
         Additionally, we retrieve any constant values from goal specification and inject those into the initial corpus.
     \item \textit{Bounded address space:}
-        Similar to \approach{}, we bound the address space.
-        Where addresses are normally 160-bit values, we constrain them with an adjustable parameter.
+        While addresses are normally 160-bit values, we constrain them to a small set with an adjustable parameter.
         During our static analysis stage, we retrieve hardcoded addresses from the Solidity source code as these are common in rug-pull contracts (e.g., used to encode privileged addresses).
     \item \textit{Revm testnet backend:} 
         We integrated the following EVM implementations as testnet backends for \spoilsport: Ethereum Tester~\cite{ethereum_tester}, Anvil~\cite{anvil} with JSON RPC and Revm~\cite{revm} with rust bindings to python.
@@ -100,4 +99,4 @@ We retrieve smart contract source code from Etherscan~\cite{EthMarketCap}.
 During our \textit{Static Analysis} stage, we use Slither~\cite{Slither} to construct function summaries which contain data and control flow dependencies.
 We use the Revm \cite{revm} Ethereum Virtual Machine (EVM) implementation as our execution backend.
 The majority of the code is written in Python, with custom Rust bindings for Revm written in PyO3.
-All evaluations were conducted on a 16-inch Macbook Pro (2021 model, M1 Max CPU), the same machine as used in the \approach{} evaluation.
+All evaluations were conducted on a 16-inch Macbook Pro (2021 model, M1 Max CPU).

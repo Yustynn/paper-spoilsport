@@ -1,17 +1,16 @@
-Having developed and evaluated the \approach{} framework in \autoref{ch:goalseeker} in order to uncover risks to end-user goals, we now apply it to rug pulls, a prominent category of fraud in blockchain smart contracts.
-This chapter addresses \textbf{SQ3} \sqIII{}
-Here, we develop a goal-directed fuzzer which implements the \approach{} framework in order to run our evaluation.
-
 Rug pulls are a prevalent category of fraud in which malicious actors launch a decentralized finance (DeFi) project and then abscond with investments, leaving investors with no financial value.
 A recent study~\cite{defi-crime-map_jcs25} shows that at least USD644M was stolen through rug pulls through 2017-2022.
 This fraud is often achieved through use of trap doors within smart contracts~\cite{SoKRugPull2025}, which are hidden or unintentional functionalities that enable the perpetrator to profit at the expense of investors.
 For instance, a malicious developer may misleadingly name a \feature{mint} (token generation) feature as \feature{burn()} to imply token destruction functionality.
 
-In this work, we investigate whether goal violations from a general ERC-20 specification can recover and enrich known rug pulls without tailoring the specification to rug pulls.
+In this work, we investigate whether testing against generically-specified ERC-20 user perspectives can recover and enrich a dataset of known rug pulls.
+This is done without tailoring that specification to rug pulls.
+We specify user roles (e.g., \holder) and goals (e.g., \maxowned) in terms of the contract's state variables and transaction history.
+We then search for violations of these goals and examine them to check for correspondence with mechanics which may allow rug pulls.
 This is motivated by our observation that trap doors rely on end-user misunderstanding of smart contract implementation details to profit at the expense of these end-users.
 Goal violations highlight scenarios in which end-user desires are thwarted.
 This suggests that, through no additional specification effort for the goal violation discovery, the found violations may surface underlying mechanics of rug pulls.
-We thus implement \spoilsport{}, a goal-directed fuzzer based on the \approach{} framework to investigate 1,376 known ERC-20 rug-pull contracts collected by prior work~\cite{SoKRugPull2025}.
+We thus implement \spoilsport{}, a goal-directed fuzzer based on these user perspective specifications to investigate 1,376 known ERC-20 rug-pull contracts collected by prior work~\cite{SoKRugPull2025}.
 
 Additionally, we develop an automated methodology for discovering meaningful starting states upon which to begin analysis.
 A key challenge for goal analysis is to begin inspection at a usage-realistic starting state which resembles characteristics of the smart contract's intended usage.
@@ -22,12 +21,10 @@ We address this by leveraging our fuzzer and role/goal semantics in order to spe
 Our contributions are as follows:
 \begin{enumerate}
     \item \textbf{Role/goal-based state initialization methodology:}
-        We propose a declarative state initialization methodology based on \approach{} role/goal semantics.
+        We propose a declarative state initialization methodology based on role/goal semantics.
         This allows for concise, natural specification of characteristics of a meaningful starting state.
     \item \textbf{\spoilsport Implementation:}
         We implement the \spoilsport{} goal-directed fuzzer and state initializer, which takes user-given specification in role/goal semantics to discover goal violations on a target contract.
-        To evaluate this, we also compare results from the \spoilsport{} fuzzer with the \approach{} solver.
-        \spoilsport{} discovers more (+38.3\%) goal violations in less time (~23x faster) on the same top ERC-20 contracts used in the initial \autoref{ch:goalseeker} evaluation.
     \item \textbf{Rug Pull Analysis:}
         We evaluate how well the surfaced ERC-20 goal violations retrieve mechanisms which aid in rug pulls within a corpus of 1,376 known rug pull contracts.
         For these, we successfully initialize 96.3\% of them to meaningful starting states in a mean of 1.54s.
