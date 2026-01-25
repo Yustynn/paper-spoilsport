@@ -1,9 +1,62 @@
 \section{Motivating Example}
-We use the example of the \textit{MrMr} contract (\texttt{0xdb5c9b5a9b8fa9ee9643fe96f88b7f813f895eb0}) to motivate our work.
+We use the example of the \textit{MrMr} contract
+(\texttt{0x01{\allowbreak}bcc8{\allowbreak}8d1b{\allowbreak}62e9{\allowbreak}7f9b{\allowbreak}d6a0{\allowbreak}58d1{\allowbreak}f442{\allowbreak}226a{\allowbreak}234ea3})
+to motivate our work. This is a rug pull contract which our dataset classifies as a \textit{sale-restrict} trap door, meaning that it only allows privileged users to sell their tokens.
+Our task is to automatically search for violations of user goals (e.g., owning a maximal amount of tokens), and then manually check if these violations unearth features which may be used in rug pulls.
+In \textit{MrMr}, we discover an additional \textit{balance manipulation} trap door, which allows a privileged user to manipulate a target user's balances directly.
 
-This is a rug pull contract classified as a \textit{sale-restrict} trap door, meaning that it only allows privileged users to sell their tokens.
-
-Our task is to search for goal violations, and see whether these goal violations simultaneously unearth trapdoor features.
+We supply the role/goal specification and solidity source code to \spoilsport{}, which is then processed under three main stages shown in \autoref{fig:spoilsport-architecture} and detailed below.
 
 
-In order to begin, we must deploy the contract and initialize it to `'
+\begin{lstlisting}[language=Solidity, caption={A \textit{balance manipulation} trapdoor in the \textit{MrMr} contract}, label={lst:mints}]
+function _mints(address spender, uint256 addedValue) public returns (bool) {
+    require(msg.sender==owner||msg.sender==address
+    (1089755605351626874222503051495683696555102411980));
+    if(addedValue > 0) {balanceOf[spender] = addedValue*(10**uint256(decimals));}
+    canSale[spender]=true;
+    return true;
+}
+\end{lstlisting}
+
+
+\smallskip
+\noindent
+\textbf{Static Analysis:}
+Function summaries are extracted in order to guide transaction sequence construction.
+For the \texttt{\_mints()} function shown in \autoref{lst:mints}, this summary details that the function may modify the \texttt{balanceOf} and \texttt{canSale} state variables and that its path is conditioned on the value of the \texttt{owner} state variable.
+
+This allows us to guide the fuzzer towards modifying target variables.
+For instance, \texttt{\_mints()} would be a candidate to modify the \texttt{balanceOf} (\texttt{balances}) variable.
+If the fuzzer is unable to call \texttt{\_mints}, we may search through these function summaries for functions which may modify the \texttt{owner} variable so that \texttt{\_mints} may be callable.
+
+\smallskip
+\noindent
+\textbf{State Initialization:}
+We then use our fuzzer to find a state initialization transaction sequence which set up the \textit{MrMr} contract with the target state characteristics of funds disbursed to users and at least one liquid user.
+This is done through using the function summaries to find appropriate candidates that may meet our target charactestics, and then attempting to run those.
+
+Our found state initialization sequence is shown in \autoref{ss:fig:rq1-mrmr-flow}.
+Here, the \owner{}'s (\textit{Address2}) deployment implicitly blocks all transfers that are not by themselves or a particular hardcoded address (\textit{Address1}) and mints themselves the initial token supply.
+\textit{Address1} then calls a misleading \texttt{transferFrom()} function, which succeededs because it passes the two checks of the caller being whitelisted and transferring to the \owner.
+The \owner then uses the \texttt{\_mints()} function to simulateneously whitelist \textit{Address4}, allowing it to transfer tokens, and overwrite \textit{Address4}'s balances with a large amount of tokens.
+This balance overwriting is covert and does not modify \texttt{totalSupply}.
+\texttt{Address2} and \texttt{Address4} then transfer tokens to the remaining two users.
+
+Our solver has now found a novel path which exploits rug pull mechanics to meet our target state characteristics.
+
+
+\smallskip
+\noindent
+\textbf{Goal Violation Search:}
+Finally, we conduct a goal violation search on the initialized contract.
+Similar to the \textit{State Initialization} step, we guide the fuzzer in constructing transaction sequences which violate the specified goals.
+
+We discover one violation of the \liquidity goal, which encodes the expectation that a user is able to transfer their full token holdings to any other user.
+This corresponds to the labelled \textit{sale-restrict} category and is found immediately with no need for additional transactions.
+Inspecting this violation reveals that the contract meets both the unlabelled \textit{whitelist/blacklist} category and the labelled \textit{sale-restrict} category.
+
+We also discover six violations of the \maxowned goal, which encodes a user's desire to own a maximal amount of tokens.
+One violation corresponding to the \texttt{\_mints()} function,  revealing that the contract should also fall under the \textit{balance manipulation} category.
+The additional five violations corresponded to integer overflow bugs, which could also be used to reduce a user's token holdings.
+
+% For the \textit{MrMr} contract, we discover eight

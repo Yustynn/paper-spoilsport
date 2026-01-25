@@ -25,3 +25,26 @@
 
 \newenvironment{results}{\begin{framed}\small\centering\it}{\end{framed}}
 \newenvironment{result}{\begin{framed}\small\centering\it}{\end{framed}}
+
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=tb,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  tabsize=2,
+  xleftmargin=2em
+}
+
+\lstdefinelanguage{Solidity}{
+  keywords={function, public, private, internal, external, returns, return, if, else, for, while, require, mapping, address, uint256, bool, true, false, msg, sender, owner},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={contract, struct, modifier, event, emit},
+  ndkeywordstyle=\color{purple}\bfseries,
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]'
+}
