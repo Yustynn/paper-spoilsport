@@ -2,9 +2,10 @@
 \noindent
 \textbf{RQ3 (New Information on Rug Pull Mechanisms):}
 We note that it is difficult to classify some features cleanly as rug pull mechanisms.
-For instance, the \texttt{decreaseAllowance()} mechanic may be cleanly classified as a rug pull mechanic as its deceptive naming and implementation imply that it will be used fraudulently.
-However, there are 12 contracts with transparently-named and correctly-implemented \texttt{pause()} functions which are all \textit{Anti-Motivated} (work against the transactor's own goals) as they globally halt all token transfers, including those by the attacker.
-This could be used to halt token transfers while the attacker drains the accumulated paired tokens from a decentralized exchange, but it is also a feature that is commonly found in ERC-20 contracts~\cite{chi-end-user}.
+For instance, the \texttt{decreaseAllowance()} function may be cleanly classified as a rug pull mechanic as its deceptive naming and implementation imply that it will be used fraudulently.
+However, there are 12 contracts with transparently-named and correctly-implemented \texttt{pause()} functions which globally halt all token transfers, including those by the attacker.
+This could be used to halt token transfers while the attacker drains the accumulated paired tokens from a decentralized exchange.
+However, this is also a feature that is commonly found in ERC-20 contracts~\cite{chi-end-user} in general.
 While nearly all found goal violations may be used to further rug pulls, we do not provide a clean classification for this reason.
 
 Goal violations provide three interesting sources of information during analysis.

@@ -11,7 +11,7 @@ In addition, \spoilsport also takes the specification of state characteristics u
 
 As final output, it delivers goal violating transaction sequences.
 
-The pipeline consists of four processing stages:
+The pipeline consists of three processing stages:
 \begin{enumerate}
     \item \textit{Static Analysis} extracts function-level summaries to guide the fuzzer.
     \item \textit{State Initialization} finds meaningful starting states using the user-provided state characteristics specification.
@@ -19,7 +19,7 @@ The pipeline consists of four processing stages:
 \end{enumerate}
 
 \subsection{Static Analysis}
-We generate function-level summaries which capture the following information:
+We first generate function-level summaries which capture the following information:
 \begin{enumerate}
     \item \textit{Write variables:} State variables which the function modifies.
     \item \textit{Control-flow variables:} State variables which are involved in conditionals and \texttt{require}/\texttt{assert} statements.

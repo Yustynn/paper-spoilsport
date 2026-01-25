@@ -6,7 +6,7 @@ For instance, a malicious developer may misleadingly name a \feature{mint} (toke
 In this work, we investigate whether testing against generically-specified ERC-20 user perspectives can recover and enrich a dataset of known rug pulls.
 This is done without tailoring that specification to rug pulls.
 We specify user roles (e.g., \holder) and goals (e.g., \maxowned) in terms of the contract's state variables and transaction history.
-We then search for violations of these goals and examine them to check for correspondence with mechanics which may allow rug pulls.
+We then search automatically for violations of these goals and examine them manually to check for correspondence with mechanics which may allow rug pulls.
 This is motivated by our observation that trap doors rely on end-user misunderstanding of smart contract implementation details to profit at the expense of these end-users.
 Goal violations highlight scenarios in which end-user desires are thwarted.
 This suggests that, through no additional specification effort for the goal violation discovery, the found violations may surface underlying mechanics of rug pulls.
