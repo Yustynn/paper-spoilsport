@@ -20,7 +20,7 @@ Additionally, many fuzzers use code coverage~\cite{sfuzz_icse20,ityfuzz_issta23,
 Combining fuzzing and symbolic execution, some works leverage symbolic analysis in order to solve difficult-to-reach constraints~\cite{ConFuzzius_eurosp21,ilf_ccs19}.
 Other works employ machine learning techniques to guide transaction sequence generation~\cite{rlf_ase22,ilf_ccs19}.
 In general, these fuzzers are oriented at discovering bugs and vulnerabilities, which is a distinct task from finding goal violations.
-While these techniques are useful to improve our tool, our task required a custom fuzzer to tightly integrate the role/goal specification format, including optimization and call capabilitiy goals, and implement the motivation analysis.
+While these techniques are useful to improve our tool, our task required a custom fuzzer to tightly integrate the role/goal specification format, including optimization and call capabilitiy goals.
 IR-Fuzz~\cite{ir-fuzz_ifs23} highlights that many fuzzers expend excessive energy around state initialization.
 Similarly, our state initialization methodology is oriented at finding goal violations more efficiently.
 However, our aim is to find usage-realistic initial states that are conducive to goal analysis, rather than conducive to finding bugs and vulnerabilities.

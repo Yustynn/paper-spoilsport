@@ -7,7 +7,7 @@ However, there are 12 contracts with transparently-named and correctly-implement
 This could be used to halt token transfers while the attacker drains the accumulated paired tokens from a decentralized exchange, but it is also a feature that is commonly found in ERC-20 contracts~\cite{chi-end-user}.
 While nearly all found goal violations may be used to further rug pulls, we do not provide a clean classification for this reason.
 
-Goal violations provide four interesting sources of information during analysis.
+Goal violations provide three interesting sources of information during analysis.
 The first is whether the goal is already violated upon state initialization.
 1,253 \textit{sale-restrict} contracts are labelled under the \textit{sale-restrict} root cause, which is effected by disallowing all non-privileged users from selling their tokens.
 However, 90.4\% of these contracts were not immediately violated upon state initialization.
@@ -25,15 +25,15 @@ This thus allows the owner to add liquidity and then prevent subsequent selling 
 This then allows the owner to withdraw the accumulated purchase liquidity.
 The \texttt{transfernewun()} function implements the ability for the \owner to manually change the contract address.
 
-The fourth is the motivation analysis.
-The \textit{Motivated} sequences signal that the underlying transactors' goals are aligned with the goal violations, making them particularly important to inspect.
-964/989 of the \textit{Motivated} transaction sequences are \minsupply violations which allow the \owner to arbitrarily generate tokens.
-While these should be \textit{Token Generation} features, they are not labelled as such in the dataset.
-These use various levels of obfuscation to mislead end-users.
-Two of these are transparently named \texttt{mint()}, signalling token generation capability.
-954 use the name of an internal, not publicly-accessible function (\texttt{\_mint()} in the frequently-used OpenZeppelin~\cite{OpenZeppelinContracts} ERC-20 implementation, but make it accessible.
-This makes the \texttt{\_mint()} functions seem innocuously inaccessible at first glance.
-Most misleadingly, six of these use function names which signal different behavior, such as \texttt{\_BURN()}, \texttt{blacklist()} and \texttt{work()}.
+% The fourth is the motivation analysis.
+% The \textit{Motivated} sequences signal that the underlying transactors' goals are aligned with the goal violations, making them particularly important to inspect.
+% 964/989 of the \textit{Motivated} transaction sequences are \minsupply violations which allow the \owner to arbitrarily generate tokens.
+% While these should be \textit{Token Generation} features, they are not labelled as such in the dataset.
+% These use various levels of obfuscation to mislead end-users.
+% Two of these are transparently named \texttt{mint()}, signalling token generation capability.
+% 954 use the name of an internal, not publicly-accessible function (\texttt{\_mint()} in the frequently-used OpenZeppelin~\cite{OpenZeppelinContracts} ERC-20 implementation, but make it accessible.
+% This makes the \texttt{\_mint()} functions seem innocuously inaccessible at first glance.
+% Most misleadingly, six of these use function names which signal different behavior, such as \texttt{\_BURN()}, \texttt{blacklist()} and \texttt{work()}.
 
 
 \begin{results}

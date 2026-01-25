@@ -25,24 +25,20 @@
     legendfinal/.style={draw, fill=#1, rectangle, rounded corners=4pt, minimum width=0.5cm, minimum height=0.25cm, line width=1.2pt},
 ]
 
-% Row 1: Inputs (top-left)
+% Row 1: Input and Processing pipeline
 \node[inputbox] (solidity) {Solidity\\Source};
-\node[specbox, below=0.3cm of solidity] (goalspec) {Role/Goal\\Spec};
-
-% Row 1: Processing pipeline
 \node[processbox, right=0.8cm of solidity] (static) {Static\\Analysis};
 \node[processbox, right=of static] (stateinit) {State\\Init};
 \node[processbox, right=of stateinit] (fuzzer) {Goal Violation\\Search};
 \node[outputbox, right=of fuzzer] (violations) {Goal\\Violations};
-\node[processbox, right=of violations] (motiv) {Motivation\\Analysis};
-\node[finalbox, below=0.6cm of motiv] (labeled) {Labeled\\Violations};
 
-% State spec below state init
+% Specs below their corresponding processes
+\node[specbox, below=0.6cm of static] (goalspec) {Role/Goal\\Spec};
 \node[specbox, below=0.6cm of stateinit] (statespec) {State\\Spec};
 
 % Arrows: inputs to static analysis
 \draw[arrow] (solidity) -- (static);
-\draw[arrow] (goalspec) -- (static);
+\draw[arrow] (goalspec) -- (static);  % now vertical, spec below process
 
 % Container: Goal-Directed Fuzzing (encapsulates State Init and Goal Violation Search)
 \node[draw, dashed, rounded corners=6pt, inner sep=0.2cm, fit=(stateinit)(fuzzer),
@@ -55,21 +51,15 @@
 \draw[arrow] (static) -- (stateinit);
 \draw[arrow] (stateinit) -- (fuzzer);
 \draw[arrow] (fuzzer) -- (violations);
-\draw[arrow] (violations) -- (motiv);
-\draw[arrow] (motiv) -- (labeled);
-
-% Arrow: goal spec also feeds motivation analysis (route below and across)
-\draw[arrow, rounded corners=4pt] (goalspec.south) -- ++(0,-0.7) -| (labeled.south);
 
 % Legend - below diagram, centered
 \node[anchor=north, yshift=-0.6cm] at (current bounding box.south) {
     \footnotesize
-    \begin{tabular}{@{}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{}}
+    \begin{tabular}{@{}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{\hspace{0.4cm}}c@{\hspace{0.1cm}}l@{}}
         \tikz\node[legendpara=blue!10] {}; & Input &
         \tikz\node[legendpara=purple!10] {}; & Specification &
         \tikz\node[legendrect, fill=orange!15] {}; & Processing &
-        \tikz\node[legendround, fill=green!10] {}; & Output &
-        \tikz\node[legendfinal, fill=green!25] {}; & Final Output
+        \tikz\node[legendround, fill=green!10] {}; & Output
     \end{tabular}
 };
 
