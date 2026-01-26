@@ -62,6 +62,10 @@ The red nodes make use of rug pull mechanics.}
 \smallskip
 \noindent
 \textbf{State Initialization:}
+\todo{The aim of state initialization and goal violation is not clear. It seems the state initialization already found something suspicious, then why do we need 
+another search for goal violation? Also, the state initialization part is not properly explained in the workflow (next section).}
+\todo{I suggest for this section, for each component, especially state initialization and goal violation, we start with "The aim of XXX is ....". For the goal violation, 
+we remind the reader that the state initialization found XXX, in the goal violation search, we aim to find YYY.}
 We then use our fuzzer to find a state initialization transaction sequence which set up the \textit{MrMr} contract with the target state characteristics of funds disbursed to users and at least one liquid user.
 This is done through using the function summaries to find appropriate candidates that may meet our target characteristics, and then attempting to run those.
 
