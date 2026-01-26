@@ -18,6 +18,8 @@ The pipeline consists of three processing stages:
     \item \textit{Goal Violation Search} performs goal-directed fuzzing from the starting state to find violating transaction sequences.
 \end{enumerate}
 
+In the following, we discuss the key components of \spoilsport in detail. 
+
 \subsection{Static Analysis}
 We first generate function-level summaries which capture the following information:
 \begin{enumerate}
@@ -31,14 +33,22 @@ These are often used to encode privileged addresses such as admin wallets and fe
 These addresses are used as concrete users during fuzzing.
 
 \subsection{Goal-Directed Fuzzing}
-We now detail the fuzzing procedure which underlies \textit{State Initialization} and \textit{Goal Violation Search}.
-Once state initialization transaction sequence is found, that sequence is applied prior to our search for goal violations.
 
-In \spoilsport, we treat seeds as a mix of transactions with concretized functions, and transactions with unconcretized functions which leave their arguments and caller unspecified.
+\todo{please include the pseudocode of the fuzzing process}
+
+\todo{Even though this section is a key component, currently, it is hard to follow. Apart from adding the pseudocode, 
+I believe it needs to refer back to the example for each paragraph.}
+
+We now detail the fuzzing procedure which underlies \textit{State Initialization} and \textit{Goal Violation Search}.
+Once state initialization transaction sequence is found, it is applied prior to our search for goal violations.
+
+In \spoilsport, we treat seeds as a mix of transactions with concretized functions, and transactions with 
+unconcretized functions which leave their arguments and caller unspecified.
 
 We direct the fuzzer to satisfy the specified goals during \textit{State Initialization} as these are interpreted as desired state characteristics to search for.
 Inversely, we direct the fuzzer to violate the specified goals during the \textit{Goal Violation Search}.
-While we use the same seed generation and seed mutation phases across these stages, we use more complex seed scheduling for \textit{State Initialization} as it involves directing the fuzzer with multiple goals.
+While we use the same seed generation and seed mutation phases across these stages, we use more complex seed scheduling for \textit{State Initialization} 
+as it involves directing the fuzzer with multiple goals.
 
 \smallskip
 \noindent
@@ -74,8 +84,10 @@ Additionally, our approach is methodologically distinct in that we do not pre-sp
 Given these task and methodological differences, comparison with existing rug pull detectors is difficult.
 
 \subsection{Specification of Roles and Goals}
+
+\todo{Shouldn't this section be before Fuzzing?}
 Rather than traditional bug or vulnerability test oracles which target bugs and vulnerabilities, we use role/goal semantics to specify user perspectives.
-This is for two two reasons.
+The reasons are two-fold. 
 The first is that role/goal attribution localizes the violation to the user rather than a particular part of the program.
 The second is that user desires are often naturally expressed as optimization problems or capabilities of calling particular functions, rather than binary properties.
 Internally, \spoilsport does convert specified goals into properties which are checked for violation.
@@ -102,7 +114,7 @@ For the \textit{Token Holder} role, we specify the following goals:
     \item \textit{\rev{\maxowned}}: $\max$ \texttt{balances[AddressUser]}.
         This optimization goal captures the profit-maximizing goal of a user, which is to own as much value (measured in tokens) as possible.
     \item \textit{\rev{\minsupply}}: $\min$ \texttt{totalSupply}.
-        This optimization goal is also a profit-maximizing goal, capturing the intuition that a lower token supply increases the value of each individual token due to increased rarity.
+        Like the previous one, this optimization goal is  a profit-maximizing goal, capturing the intuition that a lower token supply increases the value of each individual token due to increased rarity.
     \item \textit{\liquidity}: $s \leadsto\texttt{AddressUser.transfer(balances[AddressUser])}$.
         This call capability goal captures the natural user expectation that they have full control over spending the tokens which they own.
         We define this as a user being able to transfer their full holdings to any other user, at any point from the start of analysis.
@@ -132,8 +144,7 @@ The characteristics are as follows:
     \item \textit{Disbursal:}
         $\forall u \in \text{\holder}$, \texttt{balances[u] >= 1000}.
         This ensures token disbursal of at least 1000 tokens to each user, creating multiple \holder{}.
-    \item \textit{Any Liquidity:}
+    \item \textit{Any Liquidity:}  At least one \holder is liquid. Therefore, 
     $\exists u \in \text{\holder}$ where $s \leadsto\texttt{AddressUser.transfer(balances[u])}$.
-        At least one \holder is liquid.
-        We note the deliberate choice to not make all users liquid, as many rug pull implementations are designed to disallow non-privileged users from transferring their funds.
+       We note the deliberate choice to not make all users liquid, as many rug pull implementations are designed to disallow non-privileged users from transferring their funds.
 \end{enumerate}
