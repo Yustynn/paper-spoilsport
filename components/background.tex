@@ -70,7 +70,7 @@ Current approaches include:
         The second is that updating deployed smart contract systems is often troublesome as smart contract deployments are immutable, and workarounds for upgrades are often gated by timelocks and voting mechanisms.
         The third is that the current contract state may be complex and therefore pass on this complexity to the fuzzer to navigate.
     \item \textit{Find interesting states.}
-        Another approach is to attempt to find interesting states~\cite{smartian_ase21,ConFuzzius_eurosp21}.
+        Another approach is to attempt to find interesting states~\cite{smartian_ase21,ConFuzzius_eurosp21,ityfuzz_issta23}.
         Here, interesting is defined in terms such as coverage, data dependency and common vulnerability patterns.
         While this may improve the efficiency of detecting vulnerabilities, the states found are orthogonal to the usage-realism of meaningful starting states.
 \end{enumerate}
