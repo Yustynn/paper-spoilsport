@@ -65,6 +65,14 @@ However, during \textit{State Initialization}, we augment this breadth-first sea
 For instance, a transaction sequence of length five which has solved three goals would get precedence over a transaction sequence of length 4 which has solved two goals.
 
 
+\smallskip
+\noindent
+\textbf{Relation to Rug Pull Detectors:}
+Our task of enriching a dataset of known rug pulls is complementary but distinct from the rug pull detection task of detectors such as Pied Piper~\cite{pied-piper} and TokenAuditor~\cite{tokenauditor_qrs22}.
+Instead of identifying rug pulls, we are enriching understanding of already known rug pulls to surface transaction sequence examples of potential abuse and potentially detect unlabelled rug pull features.
+Additionally, our approach is methodologically distinct in that we do not pre-specify patterns of rug pull behavior.
+Given these task and methodological differences, comparison with existing rug pull detectors is difficult.
+
 \subsection{Specification of Roles and Goals}
 Rather than traditional bug or vulnerability test oracles which target bugs and vulnerabilities, we use role/goal semantics to specify user perspectives.
 This is for two two reasons.
