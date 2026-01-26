@@ -1,0 +1,8 @@
+Rug pulls are a prominent source of DeFi fraud, allowing malicious actors to profit at the expense of investors.
+We investigate whether specifications of generic ERC-20 user roles (e.g., \holder) and goals (e.g., \maxowned) can be used to surface rug pull mechanisms in a high-level dataset of 1,376 known rug pull contracts.
+These roles and goals are defined in terms of the contracts' state variables and transaction history, without tailoring to particularities of rug pulls.
+To this end, we implement the \spoilsport fuzzer to automatically discover 2,731 transaction sequences which violated user goals.
+Through manual analysis, we find that 83.6\% of rug pull types had corresponding violated goals.
+The goal violations also revealed 105 misclassifications in the original dataset and unearthed 964 additional rug pull mechanisms that were not labelled in the dataset.
+These goal-violating transaction sequences further serve as examples of how rug pulls may be performed for the given contracts.
+Additionally, we develop a novel methodology for finding usage-realistic states upon which to begin our goal violation search, successfully initializing 1,324 (96.3\%) of our target contracts prior to beginning the search.
