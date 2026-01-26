@@ -25,7 +25,8 @@ How much does the control flow guidance contribute to finding state initializati
 \smallskip
 \textbf{RQ1} investigates the efficacy of finding sequences of transactions to transform the smart contract states into ones which resemble characteristics of expected usage.
 \textbf{RQ2} and \textbf{RQ3} inspect the relationship between found goal violations and trap doors in rug pulls.
-Our evaluation does not aim to detect rug pulls in the wild, but rather enrich the ground truth of contracts which are known to be malicious.
+Our evaluation does not aim to detect rug pulls in the wild, but rather enrich the ground truth of contracts which are %known to be 
+malicious.
 In \textbf{RQ2}, we present goal violation results and investigate whether these violations correspond to the dataset's labelled rug pull types.
 In \textbf{RQ3}, we investigate the goal violations in more detail.
 While our dataset gives us a high-level classification of the rug pull trap door, we wish to understand whether there is useful additional detail about rug pull mechanics which we may retrieve from goal violations.
@@ -87,9 +88,10 @@ Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged 
 \smallskip
 \noindent
 \textbf{\spoilsport configuration:}
-We dynamically configure the number of users in our bounded address space to $\max{hardcoded_addresses + 2, 3}$.
+We dynamically configure the number of users in our bounded address space to $\max{(hardcoded_{addresses} + 2, 3)}$.
 This ensures that all hardcoded addresses are available as users while also including non-hardcoded users to represent typical end-users.
-For every function evaluated, we configure the solver to generate test input corresponding to the cartesian product of five values per parameter across all potential users as transactors.
+\todo{Did we talk about a solver? I think readers will be confused where the solver is playing a role for fuzzing.} For every function evaluated, 
+we configure the solver to generate test input corresponding to the cartesian product of five values per parameter across all potential users as transactors.
 
 During the \textit{State Initialization} step, we limit the maximum transaction sequence size to 20.
 Additionally, we bias the initial contract deployer user to be a non-hardcoded address to increase realism.
