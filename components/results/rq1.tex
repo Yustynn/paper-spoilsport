@@ -19,13 +19,20 @@ Time (s) & 1.54 & 0.52 & 0.03 & 29.73 & 3.83 \\
 
 \spoilsport successfully initialized 1,324 of 1,376 (96.3\%) ERC-20 contracts with a timeout of 30 seconds.
 \autoref{tab:rq1-timing} summarizes the timing statistics, showing a quick mean time (1.54s).
+%
+\revs{\spoilsport failed to initialize states for 51 transactions.} 
+\todo{it is not clear to me where is the solver.}
+Of the 51 failures (3.7\%), state initialization 
+failed for 38 contracts (74.5\% of failures) 
+%failed were 
+due to the solver timing out. A further 13 contracts (25.5\% of failures) failed due to issues accessing or 
+identifying the \texttt{balances} variable.
 
-Of the 51 failures (3.7\%), 38 contracts (74.5\% of failures) were due to the solver timing out.
-An further 13 contracts (25.5\% of failures) failed due to issues accessing or identifying the \texttt{balances} variable.
-
-As shown in \autoref{ss:fig:rq1-init-length-distro} lengths ranged from two to twelve transactions, with the most frequent being lengths of three (940 contracts, 71.1\%), five (164 contracts, 11.9\%) and four (98 contracts, 7.1\%).
-The vast majority (1,239, 93.5\%) of these sequences consisted solely of \texttt{transfer} calls.
-This is consistent with the general pattern of all token being minted to a single address upon deployment, and that address then disbursing the funds.
+As shown in \autoref{ss:fig:rq1-init-length-distro}, lengths \revs{of state initialization sequence} ranged from 
+two to twelve transactions, with the most frequent being lengths of three (940 contracts, 71.1\%), five 
+(164 contracts, 11.9\%) and four (98 contracts, 7.1\%). The vast majority (1,239, 93.5\%) of these sequences 
+consisted solely of \texttt{transfer} calls. This is consistent with the general pattern of all token being minted 
+to a single address upon deployment, and that address then disbursing the funds.
 
 \begin{figure*}[h]
 	\centering

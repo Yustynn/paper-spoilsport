@@ -1,6 +1,6 @@
 \smallskip
 \noindent
-\textbf{RQ2 (Correlation with Known Rug Pull Types:)}
+\textbf{RQ2 (Correlation with Known Rug Pull Types):}
 
 \begin{figure*}[h]
 	\centering
@@ -41,17 +41,24 @@ This type works by limiting end-user transactions, generally to stop them from s
 
 We found \liquidity violations in 1,143/1,303 (87.7\%) of the \textit{Transaction Limitation} rug pulls.
 156 (12.0\%) of these contracts timed out before completing the goal violation search.
-The majority of these were attributed to the \owner calling \texttt{decreaseAllowance()}.
-735 (73.6\%) of these are caused by the \owner calling the \texttt{decreaseAllowance()} function.
-This function name misleadingly implies that it implements the standard \textit{allowance} feature ERC-20 specification~\cite{ERC20TokenStandard} which should allow users to control who they permit to spend their funds.
-Upon manual analysis, we find that it instead restricts all token transfers not made by a privileged address, appropriately setting up the \textit{Sale-restrict} scenario.
+The majority of the violations i.e., %were attributed to the \owner calling \texttt{decreaseAllowance()}.
+735 (73.6\%) %of these 
+are caused by the \owner calling the \texttt{decreaseAllowance()} function.
+This function name misleadingly implies that it implements the standard \textit{allowance} feature in 
+ERC-20 specification~\cite{ERC20TokenStandard}. This should allow users to control who they permit 
+to spend their funds. %Upon manual analysis, we 
+Our analysis finds that it instead restricts all token transfers not made 
+by a privileged address, appropriately setting up the \textit{Sale-restrict} scenario.
 
-Though a small minority, we importantly fail to detect the labelled root causes of 6/9 (66.7\%) of the next most prominent rug pull type.
-This is \textit{Token Generation}, in which additional tokens are covertly generated.
-This failure is largely attributed to how we specify the \minsupply goal, which hides the assumption that the \texttt{totalSupply} variable accurately tracks the total token supply.
-Deceptively, the missed contracts tend to increase an attacker's owned tokens without correspondingly updating the \texttt{totalSupply} variable.
-This highlights a flaw in our initial specification, which may in future be improved on to track the sum of all users' token holdings rather than the \texttt{totalSupply} variable.
+Though a small minority, we importantly fail to detect the labelled root causes of 6/9 (66.7\%) of the next 
+most prominent rug pull type. This is \textit{Token Generation}, in which additional tokens are covertly generated.
+This failure is largely attributed to how we specify the \minsupply goal (\todo{see Section XXX}), which hides 
+the assumption that \texttt{totalSupply} variable accurately tracks the total token supply. Deceptively, the missed contracts 
+tend to increase an attacker's owned tokens without correspondingly updating the \texttt{totalSupply} variable.
+This highlights a flaw in our initial specification, which may in future be improved on to track the sum of all 
+users' token holdings rather than the \texttt{totalSupply} variable.
 
+\todo{Figure 5 does not seem to be referenced anywhere.}
 
 
 \begin{results}

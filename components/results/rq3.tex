@@ -14,6 +14,9 @@ The first is whether the goal is already violated upon state initialization.
 However, 90.4\% of these contracts were not immediately violated upon state initialization.
 This informs us that such contracts are capable of allowing users to trade tokens normally prior to the attacker restricting sales.
 
+
+\todo{from this paragraph, it is not clear how the goal violations allowed to enrich the dataset. The high-level reasoning is missing, like why conceptually it can 
+and the description mentions manual analysis, which further makes the matter confusing.}
 The second and third are the functions used in transactions and the roles of the transactors that call them.
 We note that the \textit{sale-restrict} \liquidity violations come from 16 different sequences of function calls.
 Additionally, analyzing multiple goal violations within the same smart contract can reveal further detail.
