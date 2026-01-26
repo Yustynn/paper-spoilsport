@@ -66,16 +66,19 @@ For instance, a transaction sequence of length five which has solved three goals
 
 
 \subsection{Specification of Roles and Goals}
-\spoilsport takes user-supplied specification of roles and goals.
-These goals are used in place of bug or vulnerability test oracles.
-We allow for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
+Rather than traditional bug or vulnerability test oracles which target bugs and vulnerabilities, we use role/goal semantics to specify user perspectives.
+This is for two two reasons.
+The first is that role/goal attribution localizes the violation to the user rather than a particular part of the program.
+The second is that user desires are often naturally expressed as optimization problems or capabilities of calling particular functions, rather than binary properties.
+Internally, \spoilsport does convert specified goals into properties which are checked for violation.
 
+We allow for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
 
 
 \smallskip
 \noindent
 \textbf{Roles and Goals for Goal Violation Search:}
-We keep the roles and goals general enough to reasonably represent ERC-20 users in general.
+We keep the roles and goals general enough to reasonably represent ERC-20 users without specifically accounting for heterogenous contract behavior.
 This is to demonstrate that no special tailoring is required for this to find useful rug pull mechanics.
 
 There are two roles involved in this analysis.
@@ -106,7 +109,7 @@ We specify the following goal for the \textit{Contract Owner} role:
 \begin{enumerate}
     \item \textit{\rev{\maxsupply}}: $\max$ \texttt{totalSupply}.
         Similar to \minsupply{}, this optimization goal is also a profit-maximizing goal but from the perspective of the entire project's value rather than a single user's holdings.
-        This captures the intuition that creating more tokens will increase the market capitalization of the project (though this is relationship is non-linear and subject to market dynamics).
+        This captures the intuition that creating more tokens will increase the market capitalization of the project (though this relationship is non-linear and subject to market dynamics).
 \end{enumerate}
 
 
