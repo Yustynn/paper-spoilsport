@@ -1,3 +1,50 @@
 \smallskip
 \noindent
 \textbf{RQ4 (Ablation of Control Flow Guidance):}
+
+\begin{table}[h]
+\centering
+\caption{
+    \centering
+    Comparison of goal violations found by \spoilsport{} with (``\spoilsport{}'') and without (``Ablated'') control flow guidance on rug-pull contracts (n=1,324). The better results are bolded.
+}
+\label{ss:table:rq4}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+& & \multicolumn{2}{c|}{\textbf{\spoilsport{}}} & \multicolumn{2}{c|}{\textbf{Ablated}} \\
+\cline{3-6}
+\textbf{Role} & \textbf{Goal} & \textbf{\# Viol.} & \textbf{Time} & \textbf{\# Viol.} & \textbf{Time} \\
+\hline
+\multirow{3}{*}{\holder}
+    & \maxowned  & \textbf{402}   & \textbf{3h 4m}   & 398   & 6h 7m \\
+\cline{2-6}
+    & \minsupply & \textbf{982}   & \textbf{40s}     & \textbf{982}   & 1m 19s \\
+\cline{2-6}
+    & \liquidity & \textbf{1,283} & \textbf{4h 19m}  & 692   & 7h 50m \\
+\hline
+\owner & \maxsupply & 64    & \textbf{44m}     & \textbf{76}    & 1h 19m \\
+\hline
+\multicolumn{2}{|l|}{\textbf{TOTAL}} & \textbf{2,731} & \textbf{8h 7m} & \textbf{2,148} & \textbf{15h 17m} \\
+\hline
+\end{tabular}
+\end{table}
+
+Results of the ablation are found in \autoref{ss:table:rq4}.
+Overall, the ablated version took 7h 10m (88.3\%) longer to find 583 (21.3\%) fewer violations.
+This difference in found violations is most pronounced in the \liquidity goal, which found 691 (50.0\%) fewer violations.
+This is attributed to the solver timing out more as it needs to explore more candidates before finding the violations.
+Where the \spoilsport \textit{Goal Violtion Search} hit the time limit while searching for \liquidity violations 161 times, the ablation hit the time limit 742 times.
+For \maxowned and \minsupply{}, roughly the same number of violations were found but over a longer time frame.
+Notably, \maxowned took almost twice as long.
+
+Of interest, there were more \maxsupply goal violations found by the ablation.
+The majority (10) of these were discovered in the \textit{MultiToken} contract (\texttt{0xb052{\allowbreak}f8a3{\allowbreak}3d8b{\allowbreak}b068{\allowbreak}414e{\allowbreak}ade0{\allowbreak}6af6{\allowbreak}9551{\allowbreak}99f9{\allowbreak}f010}) as integer overflow bugs.
+While this contract guards against integer overflow with the \texttt{SafeMath} library, it fails to use this guard for a \texttt{mintTokens()} minting function.
+The initial \spoilsport run does not initially chance upon function arguments that would cause this overflow and only finds a single function candidate to prepend the sequence.
+Thus it has less chances to find arguments which cause \texttt{totalSupply} to overflow.
+However, the ablation's search is not restricted to control flow dependencies and hence prepends additional functions, increasing the chance of hitting the integer overflow.
+
+
+\begin{results}
+    Without guidance from control flow dependencies, we found 538 (21.3\%) fewer violations while taking 7h 10m (88.3\%) longer.
+\end{results}
