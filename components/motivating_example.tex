@@ -63,12 +63,12 @@ The red nodes make use of rug pull mechanics.}
 \noindent
 \textbf{State Initialization:}
 We then use our fuzzer to find a state initialization transaction sequence which set up the \textit{MrMr} contract with the target state characteristics of funds disbursed to users and at least one liquid user.
-This is done through using the function summaries to find appropriate candidates that may meet our target charactestics, and then attempting to run those.
+This is done through using the function summaries to find appropriate candidates that may meet our target characteristics, and then attempting to run those.
 
 Our found state initialization sequence is shown in \autoref{ss:fig:mrmr-state-init}.
 Here, the \owner{}'s (\textit{Address2}) deployment implicitly blocks all transfers that are not by themselves or a particular hardcoded address (\textit{Address1}) and mints themselves the initial token supply.
 \textit{Address1} then calls a misleading \texttt{transferFrom()} function, which succeededs because it passes the two checks of the caller being whitelisted and transferring to the \owner.
-The \owner then uses the \texttt{\_mints()} function to simulateneously whitelist \textit{Address4}, allowing it to transfer tokens, and overwrite \textit{Address4}'s balances with a large amount of tokens.
+The \owner then uses the \texttt{\_mints()} function to simultaneously whitelist \textit{Address4}, allowing it to transfer tokens, and overwrite \textit{Address4}'s balances with a large amount of tokens.
 This balance overwriting is covert and does not modify \texttt{totalSupply}.
 \texttt{Address2} and \texttt{Address4} then transfer tokens to the remaining two users.
 
