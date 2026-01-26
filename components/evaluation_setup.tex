@@ -36,7 +36,7 @@ In \textbf{RQ4}, we evaluate the efficacy of using the function-level control fl
 \noindent \textbf{Heuristic-based detection of key variables:}
     We implement a heuristic-driven detection methodology for the key variables of the \texttt{balances} mapping variable (tracking user token holdings) and \texttt{totalSupply} variable (the sum of all issued tokens), which may take arbitrary names.
     This is loosely adapted from prior work~\cite{fairchecker}.
-    We make use of functions mandated by the ERC-20 specification~\cite{ERC20Spec}.
+    We make use of functions mandated by the ERC-20 specification~\cite{ERC20TokenStandard}.
     For \texttt{balances}, we retrieve the type-matched variable which is read by \texttt{balanceOf()} and written by \texttt{transfer()}.
     If no candidate exists, we additionally check for a variable named \texttt{balanceOf} as that would result in an implicit \texttt{balanceOf} function.
     For \texttt{totalSupply}, we retrieve the type-matched variable which is read by \texttt{totalSupply()} and written by \texttt{transfer()}.
