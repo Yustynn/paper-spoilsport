@@ -100,7 +100,6 @@ These addresses are used as concrete users during fuzzing.
 
 \subsection{Goal-Directed Fuzzing}
 
-\todo{please include the pseudocode of the fuzzing process}
 
 \todo{Even though this section is a key component, currently, it is hard to follow. Apart from adding the pseudocode, 
 I believe it needs to refer back to the example for each paragraph.}
@@ -136,9 +135,9 @@ This uses a similar insight to~\cite{ethploit}, constructing a transaction seque
 \textbf{Seed scheduling:}
 We implement a round-robin approach to rotate between unconcretized function candidates.
 In addition, during \textit{Goal Violation Search}, we employ a simple breadth-first search to prioritize shorter transaction sequences.
-This is due to us solving for the violation of only a single goal at a time.
-However, during \textit{State Initialization}, we augment this breadth-first search by prioritizing the seeds which have solved the most goals.
-For instance, a transaction sequence of length five which has solved three goals would get precedence over a transaction sequence of length 4 which has solved two goals.
+This is due to us \revs{fuzzing} for the violation of only a single goal at a time.
+However, during \textit{State Initialization}, we augment this breadth-first search by prioritizing the seeds which have \revs{satisfied} the most goals.
+For instance, a transaction sequence of length five which has \revs{satisfied} three goals would get precedence over a transaction sequence of length 4 which has \revs{satisfied} two goals.
 
 
 \smallskip
