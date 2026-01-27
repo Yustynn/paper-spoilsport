@@ -23,10 +23,10 @@ Additionally, this dataset was created from three composite datasets of other wo
 
 \smallskip
 \noindent
-\textbf{Limitations of the \spoilsport solver:} 
+\textbf{Limitations of the \spoilsport \revs{fuzzer}:} 
 We are primarily limited by our time budget and configuration of five candidates for each function parameter.
 Additionally, we inherit the limitations of fuzzers in general, such as difficulty in finding test inputs which meet tightly-bounded conditions.
 Specific to Ethereum, our fuzzer does not currently attempt different block timestamps for transactions.
 This renders it difficult to find violations which are dependent on block timestamps.
-Additionally, our solver does not support multi-contract analysis.
+Additionally, our \revs{fuzzer} does not support multi-contract analysis.
 We therefore had to exclude 304 (12.7\% of) contracts which called external dependencies, introducing selection bias into our analysis.

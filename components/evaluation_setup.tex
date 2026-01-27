@@ -90,8 +90,8 @@ Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged 
 \textbf{\spoilsport configuration:}
 We dynamically configure the number of users in our bounded address space to $\max{(hardcoded_{addresses} + 2, 3)}$.
 This ensures that all hardcoded addresses are available as users while also including non-hardcoded users to represent typical end-users.
-\todo{Did we talk about a solver? I think readers will be confused where the solver is playing a role for fuzzing.} For every function evaluated, 
-we configure the solver to generate test input corresponding to the cartesian product of five values per parameter across all potential users as transactors.
+For every function evaluated, 
+we configure the \revs{fuzzer} to generate test input corresponding to the cartesian product of five values per parameter across all potential users as transactors.
 
 During the \textit{State Initialization} step, we limit the maximum transaction sequence size to 20.
 Additionally, we bias the initial contract deployer user to be a non-hardcoded address to increase realism.
