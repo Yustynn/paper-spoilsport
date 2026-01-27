@@ -7,9 +7,11 @@
 
 
 % \usepackage[a4paper,margin=1in]{geometry}
-\usepackage{algorithmic}
+\usepackage{float}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\SetKwInput{KwIn}{Input}
+\SetKwInput{KwOut}{Output}
 % \usepackage[hidelinks]{hyperref}
-\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 \usepackage{amsmath}
 \let\Bbbk\relax  % Prevent conflict with newtx fonts
 \usepackage{amssymb}
@@ -34,10 +36,17 @@
 \usetikzlibrary{positioning, shapes.geometric, fit, calc}
 \usepackage{xurl}
 \usepackage{xcolor}
+\usepackage{xspace}
 
 % Reduce hyphenation in normal text (higher = less hyphenation)
 \hyphenpenalty=2000
 \exhyphenpenalty=2000
+
+% Make LaTeX more willing to place floats on text pages
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.7}
 
 \input{custom}
 

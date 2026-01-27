@@ -1,9 +1,6 @@
 \section{Overall Workflow}
 \label{ss:sec:overall_workflow}
 
-
-
-
 \input{diagrams/diagram_overall_architecture}
 
 \subsection{Architecture Overview}
@@ -100,11 +97,62 @@ These addresses are used as concrete users during fuzzing.
 
 \subsection{Goal-Directed Fuzzing}
 
+\begin{algorithm}[!htb]
+\caption{Fuzzing loop for \textit{Goal Violation Search}}
+\label{ss:code:fuzz}
+\KwIn{Static function summaries $\mathit{fn\_summaries}$, target goal $\mathit{goal}$, initialization sequence $\mathit{init\_seq}$}
+\KwOut{Set of goal-violating transaction sequences}
 
-\todo{Even though this section is a key component, currently, it is hard to follow. Apart from adding the pseudocode, 
-I believe it needs to refer back to the example for each paragraph.}
+$\mathit{testnet} \gets \textsc{InitTestnet}()$\;
+$\mathit{queue} \gets$ new Queue()\;
+$\mathit{candidates} \gets \textsc{GetFnsWritingToStateVars}(\mathit{fn\_summaries}, \mathit{goal.state\_vars})$\;
 
-We now detail the fuzzing procedure which underlies \textit{State Initialization} and \textit{Goal Violation Search}.
+\ForEach{$\mathit{candidate} \in \mathit{candidates}$}{
+    $\mathit{init\_seed} \gets$ Seed([$\mathit{candidate}$])\;
+    $\mathit{queue}.\textsc{Add}(\mathit{init\_seed})$\;
+}
+
+$\mathit{solutions\_trie} \gets$ new SolutionTrie()\;
+
+\While{$|\mathit{queue}| > 0$}{
+    $\mathit{seed} \gets \mathit{queue}.\textsc{PopNextCandidate}()$\;
+    \If{$\mathit{solutions\_trie}.\textsc{OverlapWith}(\mathit{seed})$}{
+        \textbf{continue}\;
+    }
+
+    $\mathit{is\_success} \gets$ False\;
+    $\mathit{solution} \gets$ None\;
+
+    $\mathit{testnet}.\textsc{RunSequence}(\mathit{init\_seq})$\;
+    $\mathit{baseline} \gets \textsc{CheckGoal}(\mathit{testnet}, \mathit{goal})$\;
+
+    \ForEach{$\mathit{sequence} \in \textsc{Concretize}(\mathit{seed})$}{
+        $\mathit{testnet}.\textsc{RunSequence}(\mathit{sequence})$\;
+        $\mathit{is\_success} \gets \textsc{CheckGoalViolation}(\mathit{testnet}, \mathit{goal}, \mathit{baseline})$\;
+        \If{$\mathit{is\_success}$}{
+            $\mathit{solution} \gets \mathit{sequence}$\;
+            \textbf{break}\;
+        }
+    }
+
+    \eIf{$\mathit{is\_success}$}{
+        $\mathit{solutions\_trie}.\textsc{Add}(\mathit{solution})$\;
+    }{
+        $\mathit{target\_fn} \gets \mathit{seed}.\textsc{GetFirstUnresolvedFn}()$\;
+        $\mathit{prepend\_cands} \gets \textsc{GetFnsWritingToCfDeps}(\mathit{fn\_summaries}, \mathit{target\_fn})$\;
+        \ForEach{$\mathit{prepend\_cand} \in \mathit{prepend\_cands}$}{
+            $\mathit{new\_seed} \gets \mathit{seed}.\textsc{Copy}()$\;
+            $\mathit{new\_seed}.\textsc{Prepend}(\mathit{prepend\_cand})$\;
+            $\mathit{queue}.\textsc{Add}(\mathit{new\_seed})$\;
+        }
+    }
+}
+
+\Return $\mathit{solutions\_trie.solutions}$\;
+\end{algorithm}
+
+We now detail the fuzzing \revs{loops} which underlies \textit{State Initialization} and \textit{Goal Violation Search}.
+These loops are heavily similar, with pseudocode of the \textit{Goal Violation Search} loop found in \autoref{ss:code:fuzz}.
 Once state initialization transaction sequence is found, it is applied prior to our search for goal violations.
 
 In \spoilsport, we treat seeds as a mix of transactions with concretized functions, and transactions with 
@@ -118,21 +166,35 @@ as it involves directing the fuzzer with multiple goals.
 \smallskip
 \noindent
 \textbf{Seed generation:}
+\revs{This is shown in lines 3-7 of \autoref{ss:code:fuzz}.}
 We parse the goal specification to retrieve relevant state variables.
-For instance, for a \maxsupply goal, we retrieve the \texttt{totalSupply} state variable.
+\revs{
+    For instance, in searching for a \maxowned goal violation of \textit{MrMr} motivating example, we retrieve the \texttt{balanceOf} state variable.
+}
 We then populate our initial corpus with single unconcretized function calls of functions which modify these relevant state variables, based on our function summaries.
-As any goal violations necessarily have to modify relevant state variables, this allows us to initialize our seeds with these functions as their end targets.
+\revs{
+    For \textit{MrMr}, these include \texttt{transfer()}, \texttt{transferFrom()} and \texttt{\_mints()}.
+    As any goal violations necessarily have to modify relevant state variables, all possible goal violating seeds must terminate with a call to one of these functions.
+}
 
 \smallskip
 \noindent
 \textbf{Seed mutation:}
+This is shown in lines 17-36 of \autoref{ss:code:fuzz}.
 We attempt to execute a seed by sampling its unconcretized function parameters. 
-If a seed fails to execute, we extend it by prepending candidate enabling transactions. These candidates are functions which modify the variables which the failing transaction's control-flow depends on.
+\revs{
+    If a seed fails to execute, we create a set of new seeds which prepend candidate functions that may make it succeed.
+    These candidates are functions which are shown in the function summaries to write to control flow variables of the seed's failing function.
+    For instance, if \texttt{transferFrom()} fails and depends on the \texttt{\_allowances}, the \texttt{increaseAllowance()} and \texttt{decreaseAllowance()} functions will be prepended as they write to \texttt{\_allowances}.
+}
+If a seed fails to execute, we extend it by prepending candidate enabling transactions.
+These candidates are functions which modify the variables which the failing transaction's control-flow depends on.
 This uses a similar insight to~\cite{ethploit}, constructing a transaction sequence from back to front.
 
 \smallskip
 \noindent
 \textbf{Seed scheduling:}
+This is implicit in line 10 of \autoref{ss:code:fuzz}.
 We implement a round-robin approach to rotate between unconcretized function candidates.
 In addition, during \textit{Goal Violation Search}, we employ a simple breadth-first search to prioritize shorter transaction sequences.
 This is due to us \revs{fuzzing} for the violation of only a single goal at a time.
