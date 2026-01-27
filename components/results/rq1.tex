@@ -21,11 +21,10 @@ Time (s) & 1.54 & 0.52 & 0.03 & 29.73 & 3.83 \\
 \autoref{tab:rq1-timing} summarizes the timing statistics, showing a quick mean time (1.54s).
 %
 \revs{\spoilsport failed to initialize states for 51 transactions.} 
-\todo{it is not clear to me where is the solver.}
 Of the 51 failures (3.7\%), state initialization 
 failed for 38 contracts (74.5\% of failures) 
 %failed were 
-due to the solver timing out. A further 13 contracts (25.5\% of failures) failed due to issues accessing or 
+due to the \revs{fuzzer} timing out. A further 13 contracts (25.5\% of failures) failed due to issues accessing or 
 identifying the \texttt{balances} variable.
 
 As shown in \autoref{ss:fig:rq1-init-length-distro}, lengths \revs{of state initialization sequence} ranged from 
