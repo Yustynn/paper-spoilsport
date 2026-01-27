@@ -2,12 +2,12 @@
 \noindent
 \textbf{RQ2 (Correlation with Known Rug Pull Types):}
 
-\begin{figure*}[h]
-	\centering
-	\includegraphics[width=\linewidth]{img/rp_violations_by_goal_no_mot.png}
-	\caption{Counts of goal violations found by \spoilsport{} in the rug pull dataset, broken down by goal and motivation label.}
-	\label{ss:fig:rq2-violations-by-motivation}
-\end{figure*}
+% \begin{figure*}[h]
+% 	\centering
+% 	\includegraphics[width=\linewidth]{img/rp_violations_by_goal_no_mot.png}
+% 	\caption{Counts of goal violations found by \spoilsport{} in the rug pull dataset, broken down by goal.}
+% 	\label{ss:fig:rq2-violations-by-motivation}
+% \end{figure*}
 
 \begin{table}[h]
 \centering
@@ -52,13 +52,11 @@ by a privileged address, appropriately setting up the \textit{Sale-restrict} sce
 
 Though a small minority, we importantly fail to detect the labelled root causes of 6/9 (66.7\%) of the next 
 most prominent rug pull type. This is \textit{Token Generation}, in which additional tokens are covertly generated.
-This failure is largely attributed to how we specify the \minsupply goal (\todo{see Section XXX}), which hides 
+This failure is largely attributed to how we specify the \minsupply goal \revs{(\textit{see} \autoref{ss:sec:overall_workflow})}, which hides 
 the assumption that \texttt{totalSupply} variable accurately tracks the total token supply. Deceptively, the missed contracts 
 tend to increase an attacker's owned tokens without correspondingly updating the \texttt{totalSupply} variable.
 This highlights a flaw in our initial specification, which may in future be improved on to track the sum of all 
 users' token holdings rather than the \texttt{totalSupply} variable.
-
-\todo{Figure 5 does not seem to be referenced anywhere.}
 
 
 \begin{results}
