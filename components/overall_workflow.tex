@@ -189,7 +189,7 @@ We attempt to execute a seed by sampling its unconcretized function parameters.
 }
 If a seed fails to execute, we extend it by prepending candidate enabling transactions.
 These candidates are functions which modify the variables which the failing transaction's control-flow depends on.
-This uses a similar insight to~\cite{ethploit}, constructing a transaction sequence from back to front.
+This uses a similar insight to a prior work~\cite{ethploit}, constructing a transaction sequence from back to front.
 
 \smallskip
 \noindent
@@ -199,7 +199,7 @@ We implement a round-robin approach to rotate between unconcretized function can
 In addition, during \textit{Goal Violation Search}, we employ a simple breadth-first search to prioritize shorter transaction sequences.
 This is due to us \revs{fuzzing} for the violation of only a single goal at a time.
 However, during \textit{State Initialization}, we augment this breadth-first search by prioritizing the seeds which have \revs{satisfied} the most goals.
-For instance, a transaction sequence of length five which has \revs{satisfied} three goals would get precedence over a transaction sequence of length 4 which has \revs{satisfied} two goals.
+For instance, a transaction sequence of length five which has \revs{satisfied} three goals would get precedence over a transaction sequence of length four which has \revs{satisfied} two goals.
 
 
 \smallskip

@@ -23,7 +23,7 @@ function _mints(address spender, uint256 addedValue) public returns (bool) {
 \noindent
 \textbf{Static Analysis:}
 \revs{
-    The aim of \textit{Static Analysis} is to derive information to use which can reduce the search space for the fuzzer.
+    The aim of \textit{Static Analysis} is to derive information that can reduce the search space for the fuzzer.
     To this end, we extract function summaries
 }
 % Function summaries are extracted
@@ -82,7 +82,7 @@ Our found state initialization sequence is shown in \autoref{ss:fig:mrmr-state-i
     From the start,
 }
 the \owner{}'s (\textit{Address2}) deployment implicitly blocks all transfers that are not by themselves or a particular hardcoded address (\textit{Address1}) and mints themselves the initial token supply.
-\textit{Address1} then calls a misleading \texttt{transferFrom()} function, which succeededs because it passes the two checks of the caller being whitelisted and transferring to the \owner.
+\textit{Address1} then calls a misleading \texttt{transferFrom()} function, which succeeded because it passes the two checks of the caller being whitelisted and transferring to the \owner.
 The \owner then uses the \texttt{\_mints()} function to simultaneously whitelist \textit{Address4}, allowing it to transfer tokens, and overwrite \textit{Address4}'s balances with a large amount of tokens.
 This balance overwriting is covert and does not modify \texttt{totalSupply}.
 \texttt{Address2} and \texttt{Address4} then transfer tokens to the remaining two users.
