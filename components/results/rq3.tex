@@ -44,7 +44,7 @@ In practice, the first \texttt{transferFrom()} call is generally to a liquidity 
 This thus allows the owner to add liquidity and then prevent subsequent selling of tokens by preventing victim \holder{}s from selling their tokens to that DEX without restricting them from purchasing.
 This then allows the owner to withdraw the accumulated purchase liquidity.
 \revs{
-    However, this introduces the concern that some unintended user will first \texttt{transferFrom()}.
+    However, this introduces the concern that some unintended user will first call \texttt{transferFrom()}.
     By noting that only \owner{} can call \texttt{transfernewun()}, we may understand that \texttt{transfernewun()} serves as an access-controlled contingency for the \owner to change the blacklisted address to the DEX in this case.
 }
 
