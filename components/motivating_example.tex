@@ -22,7 +22,12 @@ function _mints(address spender, uint256 addedValue) public returns (bool) {
 \smallskip
 \noindent
 \textbf{Static Analysis:}
-Function summaries are extracted in order to guide transaction sequence construction.
+\revs{
+    The aim of \textit{Static Analysis} is to derive information to use which can reduce the search space for the fuzzer.
+    To this end, we extract function summaries
+}
+% Function summaries are extracted
+in order to guide transaction sequence construction.
 For the \texttt{\_mints()} function shown in \autoref{lst:mints}, this summary details that the function may modify the \texttt{balanceOf} and \texttt{canSale} state variables and that its path is conditioned on the value of the \texttt{owner} state variable.
 
 This allows us to guide the fuzzer towards modifying target variables.
@@ -62,15 +67,21 @@ The red nodes make use of rug pull mechanics.}
 \smallskip
 \noindent
 \textbf{State Initialization:}
-\todo{The aim of state initialization and goal violation is not clear. It seems the state initialization already found something suspicious, then why do we need 
-another search for goal violation? Also, the state initialization part is not properly explained in the workflow (next section).}
-\todo{I suggest for this section, for each component, especially state initialization and goal violation, we start with "The aim of XXX is ....". For the goal violation, 
-we remind the reader that the state initialization found XXX, in the goal violation search, we aim to find YYY.}
-We then use our fuzzer to find a state initialization transaction sequence which set up the \textit{MrMr} contract with the target state characteristics of funds disbursed to users and at least one liquid user.
+\revs{
+    The aim of \textit{State Initialization} is to find a good starting state upon which to begin searching for goal violations.
+    This starting state should resemble real-world usage in order to capture realistic goal violations.
+    For this, we
+}
+use our fuzzer to find a state initialization transaction sequence which set up the \textit{MrMr} contract with the target \revs{usage-realistic} state characteristics of funds disbursed to users and at least one liquid user.
 This is done through using the function summaries to find appropriate candidates that may meet our target characteristics, and then attempting to run those.
 
 Our found state initialization sequence is shown in \autoref{ss:fig:mrmr-state-init}.
-Here, the \owner{}'s (\textit{Address2}) deployment implicitly blocks all transfers that are not by themselves or a particular hardcoded address (\textit{Address1}) and mints themselves the initial token supply.
+\revs{
+    Interestingly, the \textit{MrMr} state initialization squence already uses suspicious contract features which play a role in the rug pull.
+    As we will see, the \texttt{\_mints()} function reappears in a later goal violation.
+    From the start,
+}
+the \owner{}'s (\textit{Address2}) deployment implicitly blocks all transfers that are not by themselves or a particular hardcoded address (\textit{Address1}) and mints themselves the initial token supply.
 \textit{Address1} then calls a misleading \texttt{transferFrom()} function, which succeededs because it passes the two checks of the caller being whitelisted and transferring to the \owner.
 The \owner then uses the \texttt{\_mints()} function to simultaneously whitelist \textit{Address4}, allowing it to transfer tokens, and overwrite \textit{Address4}'s balances with a large amount of tokens.
 This balance overwriting is covert and does not modify \texttt{totalSupply}.
@@ -82,7 +93,10 @@ Our \revs{fuzzer} has now found a novel path which exploits rug pull mechanics t
 \smallskip
 \noindent
 \textbf{Goal Violation Search:}
-Finally, we conduct a goal violation search on the initialized contract.
+\revs{
+    The aim of the \textit{Goal Violation Search} is to find goal violating transaction sequences which may, as a side effect, disclose rug pull mechanics.
+    We conduct our goal violation search on the contract, starting after running our discovered state initialization sequence.
+}
 Similar to the \textit{State Initialization} step, we guide the fuzzer in constructing transaction sequences which violate the specified goals.
 
 We discover one violation of the \liquidity goal, which encodes the expectation that a user is able to transfer their full token holdings to any other user.
