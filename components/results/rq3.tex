@@ -8,26 +8,45 @@ This could be used to halt token transfers while the attacker drains the accumul
 However, this is also a feature that is commonly found in ERC-20 contracts~\cite{chi-end-user} in general.
 While nearly all found goal violations may be used to further rug pulls, we do not provide a clean classification for this reason.
 
-Goal violations provide three interesting sources of information during analysis.
+\revs{
+    Our manual analysis of the automatically discovered goal violating transaction sequences is aimed at identifying examples and details of how these rug pulls may be actuated.
+    This enriches the initial dataset, which provides only high level classifications of rug pulls.
+    To this end, these goal violations add
+}
+three interesting sources of information during analysis.
+
 The first is whether the goal is already violated upon state initialization.
 1,253 \textit{sale-restrict} contracts are labelled under the \textit{sale-restrict} root cause, which is effected by disallowing all non-privileged users from selling their tokens.
 However, 90.4\% of these contracts were not immediately violated upon state initialization.
 This informs us that such contracts are capable of allowing users to trade tokens normally prior to the attacker restricting sales.
 
 
-\todo{from this paragraph, it is not clear how the goal violations allowed to enrich the dataset. The high-level reasoning is missing, like why conceptually it can 
-and the description mentions manual analysis, which further makes the matter confusing.}
-The second and third are the functions used in transactions and the roles of the transactors that call them.
-We note that the \textit{sale-restrict} \liquidity violations come from 16 different sequences of function calls.
-Additionally, analyzing multiple goal violations within the same smart contract can reveal further detail.
+\revs{
+    The second is the functions used in goal violations, which provide information about rug pull patterns across contracts as well as localize suspicious behavior to particular functions within single contracts.
+    Disregarding the particular arguments and callers, we note that the 1,104 \textit{sale-restrict} \liquidity violations come from only 16 different sequences of function calls.
+    This immediately suggests high code-reuse or common rug pull patterns.
+    Additionally, analyzing multiple goal violations within the same smart contract can reveal further detail.
+}
 For these \textit{sale-restrict} contracts, 105 of them each have two \liquidity violations of the \owner calling the non-standard function \texttt{transfernewun()} and any user role calling the seemingly-innocuous function \texttt{transferFrom()}.
-Upon manual analysis, we note that the first call to \texttt{transferFrom()} restricts that first recipient from further reception through the \texttt{transfer} function.
-This is misclassified under the dataset's taxonomy, as it uses a \textit{Blacklist} root cause, rather than the \textit{Sale-restrict} root cause.
-This \texttt{Blacklist} implementation is particularly elegant because it keeps the on-chain data looking clean as calls to functions named \texttt{transferFrom} are not suspicious, and because it operates as an ordinary \texttt{transferFrom} function after the first call.
+Upon manual analysis, we note that the first call to \texttt{transferFrom()} restricts (blacklists) that first recipient from further reception through the \texttt{transfer} function, \revs{and that \texttt{transfernewun()} allows the \owner to change which address is blacklisted.}
+The \texttt{transferFrom()} \revs{\texttt{blacklist}} implementation is particularly elegant because it keeps the on-chain data looking clean as calls to functions named \texttt{transferFrom} are not suspicious, and because it operates as an ordinary \texttt{transferFrom()} function after the first call.
+This is misclassified under the dataset's taxonomy \revs{as a \textit{sale-restrict} root cause rather than a \textit{whitelist/blacklist} root cause}.
+
+
+\revs{
+    The third is the roles involved in the goal violations, which may help understand how rug pulls hide suspicious features.
+}
+\revs{
+    For instance, the caller of the prior \texttt{transferFrom()} function could in theory be any user, requiring only the \holder role.
+    The lack of explicit access control helps to hide its \texttt{blacklist} behavior.
+}
 In practice, the first \texttt{transferFrom()} call is generally to a liquidity pair on a decentralized exchange (DEX).
 This thus allows the owner to add liquidity and then prevent subsequent selling of tokens by preventing victim \holder{}s from selling their tokens to that DEX without restricting them from purchasing.
 This then allows the owner to withdraw the accumulated purchase liquidity.
-The \texttt{transfernewun()} function implements the ability for the \owner to manually change the contract address.
+\revs{
+    However, this introduces the concern that some unintended user will first \texttt{transferFrom()}.
+    By noting that only \owner{} can call \texttt{transfernewun()}, we may understand that \texttt{transfernewun()} serves as an access-controlled contingency for the \owner to change the blacklisted address to the DEX in this case.
+}
 
 % The fourth is the motivation analysis.
 % The \textit{Motivated} sequences signal that the underlying transactors' goals are aligned with the goal violations, making them particularly important to inspect.
