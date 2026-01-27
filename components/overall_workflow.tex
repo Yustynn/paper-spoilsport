@@ -2,6 +2,8 @@
 \label{ss:sec:overall_workflow}
 
 
+
+
 \input{diagrams/diagram_overall_architecture}
 
 \subsection{Architecture Overview}
@@ -19,6 +21,70 @@ The pipeline consists of three processing stages:
 \end{enumerate}
 
 In the following, we discuss the key components of \spoilsport in detail. 
+
+\subsection{Specification of Roles and Goals}
+Rather than traditional bug or vulnerability test oracles which target bugs and vulnerabilities, we use role/goal semantics to specify user perspectives.
+The reasons are two-fold. 
+The first is that role/goal attribution localizes the violation to the user rather than a particular part of the program.
+The second is that user desires are often naturally expressed as optimization problems or capabilities of calling particular functions, rather than binary properties.
+Internally, \spoilsport does convert specified goals into properties which are checked for violation.
+
+We allow for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
+
+
+\smallskip
+\noindent
+\textbf{Roles and Goals for Goal Violation Search:}
+We keep the roles and goals general enough to reasonably represent ERC-20 users without specifically accounting for heterogenous contract behavior.
+This is to demonstrate that no special tailoring is required for this to find useful rug pull mechanics.
+
+There are two roles involved in this analysis.
+The first is a generic \holder role, which is defined as any user whose address is a key in the contract's \texttt{balances} variable.
+This mapping variable is a frequently implemented pattern which associates user addresses to unsigned integers which track the amount of tokens they own.
+However, such mappings default all keys to a value of $0$, making every user trivially a \holder.
+The second is the \owner role, defined as the user who deploys the smart contract.
+Internally, we develop a domain-specific language for \spoilsport and specify \holder as \texttt{balances[AddressUser] >= 0} and for the \owner as \texttt{AddressUser == AddressDeployer}.
+The roles and goals are specified in 42 lines of Python code.
+
+For the \textit{Token Holder} role, we specify the following goals:
+\begin{enumerate}
+    \item \textit{\rev{\maxowned}}: $\max$ \texttt{balances[AddressUser]}.
+        This optimization goal captures the profit-maximizing goal of a user, which is to own as much value (measured in tokens) as possible.
+    \item \textit{\rev{\minsupply}}: $\min$ \texttt{totalSupply}.
+        Like the previous one, this optimization goal is  a profit-maximizing goal, capturing the intuition that a lower token supply increases the value of each individual token due to increased rarity.
+    \item \textit{\liquidity}: $s \leadsto\texttt{AddressUser.transfer(balances[AddressUser])}$.
+        This call capability goal captures the natural user expectation that they have full control over spending the tokens which they own.
+        We define this as a user being able to transfer their full holdings to any other user, at any point from the start of analysis.
+\end{enumerate}
+
+Additionally, we exclude goal violations where a user reduces their own holdings (naively violating \maxowned{}), specified through the constraint \texttt{UserCaller != UserAddress}.
+This is in keeping the principle behind \liquidity{}, which is that end-users should have control over their funds.
+We also filter out \maxowned goal violations which use the \texttt{transferFrom()} function as their terminal function as these violations are generally trivial and consented to.
+The \texttt{transferFrom()} function is typically used by a user who has been approved by the \holder to spend their funds.
+
+We specify the following goal for the \textit{Contract Owner} role:
+\begin{enumerate}
+    \item \textit{\rev{\maxsupply}}: $\max$ \texttt{totalSupply}.
+        Similar to \minsupply{}, this optimization goal is also a profit-maximizing goal but from the perspective of the entire project's value rather than a single user's holdings.
+        This captures the intuition that creating more tokens will increase the market capitalization of the project (though this relationship is non-linear and subject to market dynamics).
+\end{enumerate}
+
+
+
+\textbf{State Characteristics for \textit{State Initialization}:}
+We specify initial state characteristics which mimic real-world usage of rug pull contracts.
+This is done in in 27 lines of Python code.
+These capture the following scenario: tokens are disbursed among multiple users, and that at least one of those users is liquid.
+As these are characteristics over groups of users, we extend the role/goal semantics by adding quantifiers over goals.
+The characteristics are as follows:
+\begin{enumerate}
+    \item \textit{Disbursal:}
+        $\forall u \in \text{\holder}$, \texttt{balances[u] >= 1000}.
+        This ensures token disbursal of at least 1000 tokens to each user, creating multiple \holder{}.
+    \item \textit{Any Liquidity:}  At least one \holder is liquid. Therefore, 
+    $\exists u \in \text{\holder}$ where $s \leadsto\texttt{AddressUser.transfer(balances[u])}$.
+       We note the deliberate choice to not make all users liquid, as many rug pull implementations are designed to disallow non-privileged users from transferring their funds.
+\end{enumerate}
 
 \subsection{Static Analysis}
 We first generate function-level summaries which capture the following information:
@@ -83,68 +149,3 @@ Instead of identifying rug pulls, we are enriching understanding of already know
 Additionally, our approach is methodologically distinct in that we do not pre-specify patterns of rug pull behavior.
 Given these task and methodological differences, comparison with existing rug pull detectors is difficult.
 
-\subsection{Specification of Roles and Goals}
-
-\todo{Shouldn't this section be before Fuzzing?}
-Rather than traditional bug or vulnerability test oracles which target bugs and vulnerabilities, we use role/goal semantics to specify user perspectives.
-The reasons are two-fold. 
-The first is that role/goal attribution localizes the violation to the user rather than a particular part of the program.
-The second is that user desires are often naturally expressed as optimization problems or capabilities of calling particular functions, rather than binary properties.
-Internally, \spoilsport does convert specified goals into properties which are checked for violation.
-
-We allow for specifications of binary goals (\textit{does something happen?}), optimization goals (\textit{can I increase this value?}) and call capability goals (\textit{I want to be able to call this function}).
-
-
-\smallskip
-\noindent
-\textbf{Roles and Goals for Goal Violation Search:}
-We keep the roles and goals general enough to reasonably represent ERC-20 users without specifically accounting for heterogenous contract behavior.
-This is to demonstrate that no special tailoring is required for this to find useful rug pull mechanics.
-
-There are two roles involved in this analysis.
-The first is a generic \holder role, which is defined as any user whose address is a key in the contract's \texttt{balances} variable.
-This mapping variable is a frequently implemented pattern which associates user addresses to unsigned integers which track the amount of tokens they own.
-However, such mappings default all keys to a value of $0$, making every user trivially a \holder.
-The second is the \owner role, defined as the user who deploys the smart contract.
-Internally, we develop a domain-specific language for \spoilsport and specify \holder as \texttt{balances[AddressUser] >= 0} and for the \owner as \texttt{AddressUser == AddressDeployer}.
-The roles and goals are specified in 42 lines of Python code.
-
-For the \textit{Token Holder} role, we specify the following goals:
-\begin{enumerate}
-    \item \textit{\rev{\maxowned}}: $\max$ \texttt{balances[AddressUser]}.
-        This optimization goal captures the profit-maximizing goal of a user, which is to own as much value (measured in tokens) as possible.
-    \item \textit{\rev{\minsupply}}: $\min$ \texttt{totalSupply}.
-        Like the previous one, this optimization goal is  a profit-maximizing goal, capturing the intuition that a lower token supply increases the value of each individual token due to increased rarity.
-    \item \textit{\liquidity}: $s \leadsto\texttt{AddressUser.transfer(balances[AddressUser])}$.
-        This call capability goal captures the natural user expectation that they have full control over spending the tokens which they own.
-        We define this as a user being able to transfer their full holdings to any other user, at any point from the start of analysis.
-\end{enumerate}
-
-Additionally, we exclude goal violations where a user reduces their own holdings (naively violating \maxowned{}), specified through the constraint \texttt{UserCaller != UserAddress}.
-This is in keeping the principle behind \liquidity{}, which is that end-users should have control over their funds.
-We also filter out \maxowned goal violations which use the \texttt{transferFrom()} function as their terminal function as these violations are generally trivial and consented to.
-The \texttt{transferFrom()} function is typically used by a user who has been approved by the \holder to spend their funds.
-
-We specify the following goal for the \textit{Contract Owner} role:
-\begin{enumerate}
-    \item \textit{\rev{\maxsupply}}: $\max$ \texttt{totalSupply}.
-        Similar to \minsupply{}, this optimization goal is also a profit-maximizing goal but from the perspective of the entire project's value rather than a single user's holdings.
-        This captures the intuition that creating more tokens will increase the market capitalization of the project (though this relationship is non-linear and subject to market dynamics).
-\end{enumerate}
-
-
-
-\textbf{State Characteristics for \textit{State Initialization}:}
-We specify initial state characteristics which mimic real-world usage of rug pull contracts.
-This is done in in 27 lines of Python code.
-These capture the following scenario: tokens are disbursed among multiple users, and that at least one of those users is liquid.
-As these are characteristics over groups of users, we extend the role/goal semantics by adding quantifiers over goals.
-The characteristics are as follows:
-\begin{enumerate}
-    \item \textit{Disbursal:}
-        $\forall u \in \text{\holder}$, \texttt{balances[u] >= 1000}.
-        This ensures token disbursal of at least 1000 tokens to each user, creating multiple \holder{}.
-    \item \textit{Any Liquidity:}  At least one \holder is liquid. Therefore, 
-    $\exists u \in \text{\holder}$ where $s \leadsto\texttt{AddressUser.transfer(balances[u])}$.
-       We note the deliberate choice to not make all users liquid, as many rug pull implementations are designed to disallow non-privileged users from transferring their funds.
-\end{enumerate}
