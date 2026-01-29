@@ -35,7 +35,7 @@ These generated transaction sequences are typically run on an Ethereum Virtual M
 \noindent
 \textbf{How fuzzing typically works for smart contracts:}
 The typical approach to smart contract fuzzing is to construct a corpus of initial seeds, then mutate them to find the target vulnerabilities \cite{fuzzer_survey_2024}.
-There is a wide gamut of techniques to guide this mutation, including use of runtime feedback such as coverage and prior static analysis such as data dependency.
+There is a wide range of techniques to guide this mutation, including use of runtime feedback such as coverage and prior static analysis such as data dependency.
 Vulnerabilities are generally determined by test oracles, which are either user-specified or general purpose.
 As an example, a common oracle identifies suicidal smart contracts, which are smart contracts that can be destroyed through the \texttt{selfdestruct} instruction by an arbitrary user.
 
@@ -50,7 +50,7 @@ The novel difference is that it introduces a preliminary step prior to generatin
 This step is to find a meaningful starting state before beginning analysis.
 By meaningful, we mean that the state captures important characteristics of the contract being used in the wild, such as that tokens are distributed among multiple users.
 As further discussed in \autoref{ss:finding-reasonable-starting-state}, the starting states used by fuzzers often do not prioritize usage-realism, clone the potentially complex blockchain state or are manually specified in deployment scripts.
-Usage-realism of the starting state is particularly important to us as \spoilsport is explicitly aimed at unearthing motivation dynamics of users in the wild.
+Usage-realism of the starting state is particularly important as \spoilsport is explicitly aimed at unearthing motivation dynamics of users in the wild.
 
 \subsection{Finding Meaningful Starting States}
 \label{ss:finding-reasonable-starting-state}
@@ -75,7 +75,9 @@ Current approaches include:
         While this may improve the efficiency of detecting vulnerabilities, the states found are orthogonal to the usage-realism of meaningful starting states.
 \end{enumerate}
 
-We propose the use of the same role/goal semantics which we use to specify user perspectives in order to declaratively specify characteristics of a valid starting state.
+%We propose the use of the same role/goal semantics which we use to specify user perspectives in order to declaratively specify characteristics of a valid starting state.
+
+We declaratively specify characteristics of a valid starting state via the same role/goal semantics that capture user perspectives. % in order to declaratively specify characteristics of a valid starting state.
 We then use \spoilsport{} to reach such a starting state.
 For instance, for our evaluation of ERC-20 contracts, we specify the following:
 \begin{enumerate}
@@ -83,5 +85,6 @@ For instance, for our evaluation of ERC-20 contracts, we specify the following:
     \item At least one user should be liquid, meaning that they are able to transfer their tokens to any other user in our bounded address space.
 \end{enumerate}
 
-This is a reasonable intermediate between full replay of transactions and starting from deployment as it captures the core characteristics of usage-realism: that there are tokens distributed among users and that at least one user is liquid.
+This is a reasonable intermediate state between full replay of transactions and starting from deployment, as it captures the core characteristics 
+of usage-realism: that there are tokens distributed among users and that at least one user is liquid.
 With these semantics and the key variables pre-identified, we declare this specification once in 27 lines of code and use it for all evaluated ERC-20 contracts.

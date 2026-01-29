@@ -4,7 +4,7 @@
 \subsection{Trap Door Rug Pulls}
 A recent systemization of knowledge~\cite{SoKRugPull2025} develops an overarching rug pull taxonomy and compiles the dataset we use in this work.
 Various works focus on detection of these rug pulls.
-Similar to us, TokenAuditor~\cite{tokenauditor_qrs22} uses a fuzzing-based approach.
+Similar to our work, TokenAuditor~\cite{tokenauditor_qrs22} uses a fuzzing-based approach.
 Pied Piper~\cite{pied-piper} first performs static analysis with datalog to detect trap door candidates and then validates them through directed fuzzing.
 Several works~\cite{do-not-rug_math22,trade-or-trick_acs22,trapdoor} find rug pulls through heuristics and machine learning techniques.
 Two of these works~\cite{do-not-rug_math22,trapdoor} center on tokens which were listed on Uniswap~\cite{uniswap_protocol}.
@@ -14,8 +14,8 @@ With the exception of the state initialization procedure, we do not tailor our s
 This frees us from dependence on particular characteristics of rug pull smart contracts.
 
 \subsection{Smart Contract Fuzzers and State Initialization}
-Wu et al present a recent survey on smart contract fuzzers~\cite{fuzzer_survey_2024}.
-Similar to us, several works use static and dynamic dataflow-based guidance~\cite{smartian_ase21,ethploit,ir-fuzz_ifs23} to construct targeted transaction sequences.
+Wu et al.~\cite{fuzzer_survey_2024} present a recent survey on smart contract fuzzers.
+Similar to our work, several works use static and dynamic dataflow-based guidance~\cite{smartian_ase21,ethploit,ir-fuzz_ifs23} to construct targeted transaction sequences.
 Additionally, many fuzzers use code coverage~\cite{sfuzz_icse20,ityfuzz_issta23,reguard} and branch distance~\cite{sfuzz_icse20,ir-fuzz_ifs23,ityfuzz_issta23} in order to prioritize interesting seeds. 
 Combining fuzzing and symbolic execution, some works leverage symbolic analysis in order to solve difficult-to-reach constraints~\cite{ConFuzzius_eurosp21,ilf_ccs19}.
 Other works employ machine learning techniques to guide transaction sequence generation~\cite{rlf_ase22,ilf_ccs19}.

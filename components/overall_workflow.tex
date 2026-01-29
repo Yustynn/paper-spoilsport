@@ -4,7 +4,7 @@
 \input{diagrams/diagram_overall_architecture}
 
 \subsection{Architecture Overview}
-We present the overall workflow in \autoref{fig:spoilsport-architecture}.
+We present the overall workflow of \spoilsport in \autoref{fig:spoilsport-architecture}.
 \spoilsport takes the solidity source code of the target contract and the role/goal specification as input.
 In addition, \spoilsport also takes the specification of state characteristics using role/goal semantics for its state initialization stage.
 
@@ -152,7 +152,9 @@ $\mathit{solutions\_trie} \gets$ new SolutionTrie()\;
 \end{algorithm}
 
 We now detail the fuzzing \revs{loops} which underlies \textit{State Initialization} and \textit{Goal Violation Search}.
-These loops are heavily similar, with pseudocode of the \textit{Goal Violation Search} loop found in \autoref{ss:code:fuzz}.
+%These loops are heavily similar, with 
+They are similar and hence, for brevity, we only show 
+the pseudocode of the \textit{Goal Violation Search} loop found in \autoref{ss:code:fuzz}.
 Once state initialization transaction sequence is found, it is applied prior to our search for goal violations.
 
 In \spoilsport, we treat seeds as a mix of transactions with concretized functions, and transactions with 
@@ -183,12 +185,13 @@ We then populate our initial corpus with single unconcretized function calls of 
 This is shown in lines 17-36 of \autoref{ss:code:fuzz}.
 We attempt to execute a seed by sampling its unconcretized function parameters. 
 \revs{
-    If a seed fails to execute, we create a set of new seeds which prepend candidate functions that may make it succeed.
-    These candidates are functions which are shown in the function summaries to write to control flow variables of the seed's failing function.
+If a seed fails to execute, we extend it by prepending candidate enabling transactions. 
+These candidates are functions which modify the variables which the failing transaction’s control-flow depends on.
+%    These candidates are functions which are shown in the function summaries to write to control flow variables of the seed's failing function.
     For instance, if \texttt{transferFrom()} fails and depends on the \texttt{\_allowances}, the \texttt{increaseAllowance()} and \texttt{decreaseAllowance()} functions will be prepended as they write to \texttt{\_allowances}.
 }
-If a seed fails to execute, we extend it by prepending candidate enabling transactions.
-These candidates are functions which modify the variables which the failing transaction's control-flow depends on.
+%If a seed fails to execute, we extend it by prepending candidate enabling transactions.
+%These candidates are functions which modify the variables which the failing transaction's control-flow depends on.
 This uses a similar insight to a prior work~\cite{ethploit}, constructing a transaction sequence from back to front.
 
 \smallskip
