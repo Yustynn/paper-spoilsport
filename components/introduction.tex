@@ -17,7 +17,7 @@ This is motivated by our observation that trap doors rely on end-user misunderst
 \reva{Goal violations highlight scenarios in which end-user desires are thwarted by the actual smart contract behavior.}
 This suggests that, through no additional specification effort for the goal violation discovery, the found violations may surface underlying mechanics of rug pulls.
 We thus implement \spoilsport{}, a goal-directed fuzzer based on these user perspective specifications to investigate 1,376 known ERC-20 rug-pull contracts collected by prior work~\cite{SoKRugPull2025}.
-\reva{We also conduct an exploratory survey on 14 smart contract auditors, developers and testers to understand how they perceive the usefulness of having such goal violations surfaced to them.}
+\reva{We also conduct an exploratory survey on 13 smart contract auditors, developers and testers to understand how they perceive the usefulness of having such goal violations surfaced to them.}
 
 Additionally, we develop an automated methodology for discovering meaningful starting states upon which to begin analysis.
 A key challenge for goal analysis is to begin inspection at a usage-realistic starting state which resembles characteristics of the smart contract's intended usage.
@@ -42,8 +42,8 @@ Our contributions are as follows:
         For these, we successfully initialize 96.3\% of them to meaningful starting states with a mean of 1.54s.
         We then discovered 2,731 goal violations, with 83.6\% of contracts having goal violations which correspond to their labelled rug pull type and providing additional detail beyond the original labels.
     \item \reva{\textbf{Exploratory Practitioner Survey:}
-        We survey 14 smart contract practitioners about the
+        We survey 13 smart contract practitioners about the
         perceived usefulness of example goal violations to their work and smart contract security.
-        12 (85.7\%) practitioners rated the usefulness to their workflow as at least four on a five-point scale. 13 (92.9\%) practitioners stated that most end-users are typically unaware of even risks induced by common token administration features such as globally pausing a token's transfers.
+        11 (84.6\%) practitioners rated the usefulness to their workflow as at least four on a five-point scale.
         }
 \end{enumerate}

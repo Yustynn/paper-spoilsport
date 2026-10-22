@@ -21,19 +21,25 @@ Do the found goal violations effectively disclose new information about rug pull
 \textbf{RQ4 (Ablation of Control Flow Guidance)}
 How much does the control flow guidance contribute to finding state initialization and goal violations?
 
+\smallskip
+\reva{\textbf{RQ5 (Practitioner Perception of Goal Violations)}
+How do smart contract practitioners perceive the usefulness of goal-violation examples to their workflows?
+}
+
 
 \smallskip
 \textbf{RQ1} investigates the efficacy of finding sequences of transactions to transform the smart contract states into ones which resemble characteristics of expected usage.
 \textbf{RQ2} and \textbf{RQ3} inspect the relationship between found goal violations and trap doors in rug pulls.
-Our evaluation does not aim to detect rug pulls in the wild, but rather enrich the ground truth of contracts which are %known to be 
+Our evaluation does not aim to detect rug pulls in the wild, but rather enrich the ground truth of contracts which are %known to be
 malicious.
 In \textbf{RQ2}, we present goal violation results and investigate whether these violations correspond to the dataset's labelled rug pull types.
 In \textbf{RQ3}, we investigate the goal violations in more detail.
 While our dataset gives us a high-level classification of the rug pull trap door, we wish to understand whether there is useful additional detail about rug pull mechanics which we may retrieve from goal violations.
 In \textbf{RQ4}, we evaluate the efficacy of using the function-level control flow dependencies to guide seed mutation by removing this guidance.
+\reva{In \textbf{RQ5}, we conduct and present survey findings to validate that surfacing goal violations may be useful to smart contract practitioners.}
 
 \smallskip
-\noindent 
+\noindent
 \noindent \textbf{Heuristic-based detection of key variables:}
     We implement a heuristic-driven detection methodology for the key variables of the \texttt{balances} mapping variable (tracking user token holdings) and \texttt{totalSupply} variable (the sum of all issued tokens), which may take arbitrary names.
     This is loosely adapted from prior work~\cite{fairchecker}.
@@ -66,7 +72,7 @@ Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged 
 1.4\% are due to \textit{Transfer Block} which globally disables transfers.
 
 \smallskip
-\noindent 
+\noindent
 \textbf{Optimizations:} To speed up the construction of transaction sequences, we implement the following optimizations:
 \begin{enumerate}
     \item \textit{Initial corpuses optimizations:}
@@ -78,7 +84,7 @@ Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged 
     \item \textit{Bounded address space:}
         While addresses are normally 160-bit values, we constrain them to a small set with an adjustable parameter.
         During our static analysis stage, we retrieve hardcoded addresses from the Solidity source code as these are common in rug-pull contracts (e.g., used to encode privileged addresses).
-    \item \textit{Revm testnet backend:} 
+    \item \textit{Revm testnet backend:}
         We integrated the following EVM implementations as testnet backends for \spoilsport: Ethereum Tester~\cite{ethereum_tester}, Anvil~\cite{anvil} with JSON RPC and Revm~\cite{revm} with rust bindings to python.
         Of the three, the Revm integration was fastest at 6,962 transactions per second (TPS).
         Anvil and Ethereum Tester were significantly slower, with 91TPS and 44TPS respectively.
@@ -90,7 +96,7 @@ Of these, 95.3\% are due to \textit{Sale-Restrict} which only allows privileged 
 \textbf{\spoilsport configuration:}
 We dynamically configure the number of users in our bounded address space to $\max{(hardcoded_{addresses} + 2, 3)}$.
 This ensures that all hardcoded addresses are available as users while also including non-hardcoded users to represent typical end-users.
-For every function evaluated, 
+For every function evaluated,
 we configure the \revs{fuzzer} to generate test input corresponding to the cartesian product of five values per parameter across all potential users as transactors.
 
 During the \textit{State Initialization} step, we limit the maximum transaction sequence size to 20.
@@ -107,3 +113,24 @@ During our \textit{Static Analysis} stage, we use Slither~\cite{Slither} to cons
 We use the Revm \cite{revm} Ethereum Virtual Machine (EVM) implementation as our execution backend.
 The majority of the code is written in Python, with custom Rust bindings for Revm written in PyO3.
 All evaluations were conducted on a 16-inch Macbook Pro (2021 model, M1 Max CPU).
+
+
+\smallskip
+\noindent
+\textbf{\reva{Practitioner Questionnaire.}}
+\reva{The practitioner questionnaire was conducted on Google Forms with 26 questions, including a consent form ensuring that we have participants' consent for anonymous response data collection.
+The first section collected user demographics and conducted a knowledge check to ensure their expertise.
+The second section gathered general perspectives on how they viewed or evaluated behaviors harmful or surprising to end-users.
+The final section gave definitions of ERC-20 roles and goals as well as sample goal violations for the popular USD Tether contract and queried the participants on the utility of these goal violations.
+The questions were a mix of free-text responses and five-point Likert scales.
+}
+
+\reva{
+We recruited five participants from CloudResearch's Connect platform, filtered to those with self-reported advanced or expert blockchain competence and paid USD5 each.
+We additionally recruited 10 participants from Prolific, filtered to current job role of Blockchain Developer / Specialist and paid £4.80 each.
+Of these 15 participants, we excluded one for having consistently off-topic answers and describing themselves as an artificial intelligence, and another as they did not have professional experience in the smart contract field.
+The 13 remaining participants had a median of three years of smart contract experience.
+Ten reported development experience, six reported testing experience, and four reported auditing experience.
+The participants spanned seven countries, predominantly the United States (five participants).
+For age, they distributed fairly uniformly into 18--24 years (four participants), 25--34 years (four participants) and 35--44 years (5 participants).
+}

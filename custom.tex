@@ -24,30 +24,6 @@
 \newcommand{\revs}[1]{#1}
 \newcommand{\reva}[1]{\textcolor{blue}{#1}}
 
-% CSCW writing guide: purple text needs narrative review; original wording is retained.
-% Use \narrativechangesfalse to hide the color; search for "CSCW:" for author notes.
-\newif\ifnarrativechanges
-\narrativechangestrue
-\definecolor{narrativecolor}{RGB}{125,45,145}
-\newcommand{\narrativechange}[1]{\ifnarrativechanges{\color{narrativecolor}#1}\else#1\fi}
-
-% Independent toggle for editorial bullet notes (not manuscript prose).
-% Set \narrativenotesfalse to hide all notes before submission or word counting.
-\newif\ifnarrativenotes
-\narrativenotestrue
-\newcommand{\narrativenote}[2]{\ifnarrativenotes
-  \par\begingroup\small\color{narrativecolor}
-  \begin{quote}
-  \textbf{Writing note --- #1}
-  \begin{itemize}[leftmargin=1.3em,nosep]
-    #2
-  \end{itemize}
-  \end{quote}\endgroup\par
-\fi}
-
-% Todo marker
-\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
-
 % Constants
 \newcommand{\numcontracts}{132\xspace}
 

@@ -1,8 +1,10 @@
 \section{Conclusion}
 \label{ss:sec:conclusion}
+
 We demonstrate that an analysis of general ERC-20 user roles and goals in 1,376 known rug pull contracts automatically recovers and enriches many rug pull mechanics.
 These perspectives are implemented in the role/goal semantics, without tailoring to particular rug pull patterns.
 Overall, we found 2,731 goal violations with our custom \spoilsport goal-directed fuzzer, unveiling unlabelled and mislabelled mechanics which may be used to rug pull end-users.
 Additionally, we develop a declarative methodology to find usage-realistic starting states from which to search for goal violations and define realistic state characteristics of ERC-20 rug pulls.
 Using a dataset of known rug-pull contracts~\cite{SoKRugPull2025}, our evaluation shows that \spoilsport{} successfully initializes 1,324/1,376 (96.3\%) of our target contracts to these starting states.
+\reva{Validating the utility of discovering goal violations, 11/13 (84.6\%) surveyed smart contract practitioners rated the example goal violations as useful to their workflows.}
 Future work includes extending the \spoilsport fuzzer to handle multi-contract systems in order to better investigate financial fraud in more complex DeFi applications.
