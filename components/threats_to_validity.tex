@@ -12,7 +12,7 @@ Additionally, this dataset was created from three composite datasets of other wo
 
 \smallskip
 \noindent
-\textbf{Limitations of the goal violation discovery task:} 
+\textbf{Limitations of the goal violation discovery task:}
     While this work demonstrates overlap, goal violations and rug pull mechanisms are not equivalent.
     There are legitimate purposes for features underlying some goal violations which are not fraudulent, such as the ability to \textit{blacklist} suspicious users for regulatory compliance.
     However, these may still be abusable (e.g., by blacklisting non-suspicious users).
@@ -24,10 +24,21 @@ Additionally, this dataset was created from three composite datasets of other wo
 
 \smallskip
 \noindent
-\textbf{Limitations of the \spoilsport \revs{fuzzer}:} 
+\textbf{Limitations of the \spoilsport \revs{fuzzer}:}
 We are primarily limited by our time budget and configuration of five candidates for each function parameter.
 Additionally, we inherit the limitations of fuzzers in general, such as difficulty in finding test inputs which meet tightly-bounded conditions.
 Specific to Ethereum, our fuzzer does not currently attempt different block timestamps for transactions.
 This renders it difficult to find violations which are dependent on block timestamps.
 Additionally, our \revs{fuzzer} does not support multi-contract analysis.
 We therefore had to exclude 304 (12.7\% of) contracts which called external dependencies, introducing selection bias into our analysis.
+
+\smallskip
+\noindent
+\reva{
+\textbf{Limitations of the practitioner survey:}
+Our sample of 13 respondents for smart contract professionals may not generalize to the larger population.
+    We mitigate this by diversifying recruitment among two platforms with demographic filters and perform knowledge checks to verify that respondents engage in professional smart contract work.
+Additionally, we are limited by our choice of goal violation examples.
+    We chose examples in the USDT contract, which is not a rug pull, in order to counter selection bias of clearly security-related findings.
+    However, goal violations are diverse and thus there is a need for further study to understand if this diversity is generally useful.
+}
