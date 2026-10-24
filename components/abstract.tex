@@ -1,4 +1,4 @@
-\reva{Tensions between differing goals of different types of end-users may result in undesirable or unexpected behavior in blockchain smart contracts. Within ERC-20 smart contracts, we investigate how looking for sequences of transactions which violate end-user goals may uncover features which enable the prominent DeFi fraud category of rug pulls.}
+\reva{Tensions between the conflicting goals of different end-users may result in undesirable or unexpected behavior in blockchain smart contracts. Within ERC-20 smart contracts, we investigate how looking for sequences of transactions which violate end-user goals may uncover features which enable the prominent DeFi fraud category of rug pulls.}
 We do this through specifications of generic ERC-20 user roles (e.g., \holder) and goals (e.g., \maxowned) and evaluate a high-level dataset of 1,376 known rug pull contracts.
 These roles and goals are defined in terms of the contracts' state variables and transaction history, without tailoring to particularities of rug pulls.
 To this end, we implement the \spoilsport fuzzer to automatically discover 2,731 transaction sequences which violated user goals.
